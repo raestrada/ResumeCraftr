@@ -3,6 +3,7 @@ import json
 import os
 from rich.console import Console
 from cli.cmd.pdf import extract_text
+from cli.cmd.sections import extract_sections
 
 console = Console()
 
@@ -32,6 +33,7 @@ def init():
 
 cli.add_command(init)
 cli.add_command(extract_text, name="extract")
+cli.add_command(extract_sections, name="extract-sections")
 
 if __name__ == "__main__":
     cli()

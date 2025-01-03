@@ -1,0 +1,54 @@
+{
+    "sections": [
+        {
+            "name": "Contact Information",
+            "required": true,
+            "fields": ["Full Name", "Email", "Phone Number", "LinkedIn", "GitHub", "Portfolio"]
+        },
+        {
+            "name": "Summary",
+            "required": true,
+            "description": "A brief professional summary highlighting key skills and experience."
+        },
+        {
+            "name": "Technical Skills",
+            "required": true,
+            "description": "A list of programming languages, tools, and technologies the candidate is proficient in."
+        },
+        {
+            "name": "Work Experience",
+            "required": true,
+            "description": "A detailed list of professional work experience, including job titles, companies, dates, and key responsibilities."
+        },
+        {
+            "name": "Projects",
+            "required": false,
+            "description": "Relevant technical projects, personal or professional, showcasing skills and problem-solving abilities."
+        },
+        {
+            "name": "Education",
+            "required": true,
+            "description": "Academic background including degrees, institutions, and graduation years."
+        },
+        {
+            "name": "Certifications",
+            "required": false,
+            "description": "List of relevant certifications, courses, and professional training."
+        },
+        {
+            "name": "Publications & Open Source Contributions",
+            "required": false,
+            "description": "Publications, articles, or contributions to open-source projects."
+        },
+        {
+            "name": "Awards & Recognitions",
+            "required": false,
+            "description": "Professional awards and recognitions received."
+        },
+        {
+            "name": "Languages",
+            "required": false,
+            "description": "Spoken and written languages with proficiency levels."
+        }
+    ]
+}
