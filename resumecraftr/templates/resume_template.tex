@@ -1,0 +1,68 @@
+\documentclass[a4paper,10pt]{article}
+\usepackage[left=1in, right=1in, top=1in, bottom=1in]{geometry}
+\usepackage{titlesec}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{fontspec}
+
+% Set a professional font
+\setmainfont{Calibri}
+
+% Define section formatting
+\titleformat{\section}{\large\bfseries\color{blue}}{}{0em}{}
+\titleformat{\subsection}{\normalsize\bfseries\color{black}}{}{0em}{}
+
+\begin{document}
+
+\begin{center}
+    {\Huge \textbf{John Doe}}\\
+    {\large Software Engineer}\\
+    \href{mailto:john.doe@example.com}{john.doe@example.com} | (123) 456-7890 | \href{https://linkedin.com/in/johndoe}{linkedin.com/in/johndoe} | \href{https://github.com/johndoe}{github.com/johndoe}
+\end{center}
+
+\hrule
+
+\section*{Summary}
+\noindent {\small A brief professional summary highlighting key skills and experience.}
+
+\section*{Technical Skills}
+\begin{itemize}
+    \item Programming: Python, Java, C++
+    \item Frameworks: Django, Flask, React
+    \item Tools: Git, Docker, Kubernetes
+\end{itemize}
+
+\section*{Work Experience}
+\textbf{Software Engineer} \hfill 2020 - Present\\
+Company Name, Location\\
+\begin{itemize}
+    \item Developed scalable web applications using Python and React.
+    \item Implemented CI/CD pipelines for automated deployments.
+\end{itemize}
+
+\section*{Projects}
+\textbf{Project Name} \hfill Year\\
+Description of the project and technologies used.
+
+\section*{Education}
+\textbf{Bachelor's Degree in Computer Science} \hfill Year\\
+University Name, Location
+
+\section*{Certifications}
+\textbf{AWS Certified Solutions Architect} \hfill Year
+
+\section*{Publications \\ & Open Source Contributions}
+\textbf{Article/Project Name} \hfill Year\\
+Description or link to publication.
+
+\section*{Awards \\ & Recognitions}
+\textbf{Award Name} \hfill Year
+
+\section*{Languages}
+\begin{itemize}
+    \item English - Fluent
+    \item Spanish - Intermediate
+\end{itemize}
+
+\end{document}
