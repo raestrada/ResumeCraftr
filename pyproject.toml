@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "resumecraftr"
+version = "0.1.0"
+description = "AI-powered resume optimizer and ATS-friendly CV generator."
+authors = ["Your Name <you@example.com>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = ">=3.10"
+click = ">=8.0"
+rich = ">=12.0"
+openai = ">=1.0"
+PyPDF2 = ">=3.0"
+pydantic = ">=1.9"
+
+[tool.poetry.scripts]
+resumecraftr = "resumecraftr.cli.main:main"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
