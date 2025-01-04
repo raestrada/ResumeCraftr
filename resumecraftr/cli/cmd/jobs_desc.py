@@ -37,8 +37,8 @@ def add_job_description(job_name, content, file):
             config = json.load(config_file)
     
     job_list = config.get("job_descriptions", [])
-    if job_file not in job_list:
-        job_list.append(job_file)
+    if os.path.basename(job_file) not in job_list:
+        job_list.append(os.path.basename(job_file))
     config["job_descriptions"] = job_list
     
     with open(CONFIG_FILE, "w", encoding="utf-8") as config_file:
