@@ -6,8 +6,8 @@
 \usepackage{hyperref}
 \usepackage{fontspec}
 
-% Set a professional font
-\setmainfont{Calibri}
+% Set professional font (works only with XeLaTeX)
+\setmainfont{Liberation Sans}
 
 % Define section formatting
 \titleformat{\section}{\large\bfseries\color{blue}}{}{0em}{}
@@ -18,7 +18,9 @@
 \begin{center}
     {\Huge \textbf{John Doe}}\\
     {\large Software Engineer}\\
-    \href{mailto:john.doe@example.com}{john.doe@example.com} | (123) 456-7890 | \href{https://linkedin.com/in/johndoe}{linkedin.com/in/johndoe} | \href{https://github.com/johndoe}{github.com/johndoe}
+    \href{mailto:john.doe@example.com}{john.doe@example.com} | (123) 456-7890 | 
+    \href{https://linkedin.com/in/johndoe}{\texttt{linkedin.com/in/johndoe}} | 
+    \href{https://github.com/johndoe}{\texttt{github.com/johndoe}}
 \end{center}
 
 \hrule
@@ -52,11 +54,11 @@ University Name, Location
 \section*{Certifications}
 \textbf{AWS Certified Solutions Architect} \hfill Year
 
-\section*{Publications \\ & Open Source Contributions}
+\section*{Publications and Open Source Contributions}
 \textbf{Article/Project Name} \hfill Year\\
 Description or link to publication.
 
-\section*{Awards \\ & Recognitions}
+\section*{Awards and Recognitions}
 \textbf{Award Name} \hfill Year
 
 \section*{Languages}

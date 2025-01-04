@@ -6,6 +6,7 @@ from cli.cmd.pdf import extract_text
 from cli.cmd.sections import extract_sections
 from cli.cmd.jobs_desc import add_job_description
 from cli.cmd.resume import optimize_resume
+from cli.cmd.latex import generate_pdf
 
 
 console = Console()
@@ -39,6 +40,8 @@ cli.add_command(extract_text, name="extract")
 cli.add_command(extract_sections, name="extract-sections")
 cli.add_command(add_job_description, name="add-job-description")
 cli.add_command(optimize_resume, name="optimize")
+cli.add_command(generate_pdf, name="toPdf")
+
 
 
 if __name__ == "__main__":
