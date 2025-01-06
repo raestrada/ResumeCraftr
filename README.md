@@ -1,6 +1,3 @@
-[![GitHub Actions Status](https://github.com/raestrada/ResumeCraftr/actions/workflows/pre-commit.yml/badge.svg)](https://github.com/raestrada/ResumeCraftr/actions)  
-[![GitHub Actions Status](https://github.com/raestrada/ResumeCraftr/actions/workflows/pytest.yml/badge.svg)](https://github.com/raestrada/ResumeCraftr/actions)
-
 # <img src="https://res.cloudinary.com/dyknhuvxt/image/upload/f_auto,q_auto/v1736189459/resumecraftr_eb7drc.png" alt="ResumeCraftr Logo" width="100" height="100"> ResumeCraftr - AI-powered ATS Resume Optimization 📄🤖
 
 Welcome to [**ResumeCraftr**](https://resumecraftr.app), the open-source tool designed to optimize resumes for ATS (Applicant Tracking Systems) using AI and LaTeX formatting. ResumeCraftr extracts, restructures, and formats CVs to ensure they meet ATS requirements while maintaining readability and professionalism.
