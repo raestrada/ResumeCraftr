@@ -33,7 +33,7 @@ def extract_sections():
         config = json.load(f)
     
     extracted_files = config.get("extracted_files", [])
-    language = config.get("primary_language", "English")
+    language = config.get("primary_language", "EN")
     
     if not extracted_files:
         console.print("[bold red]No extracted text files found in configuration.[/bold red]")
