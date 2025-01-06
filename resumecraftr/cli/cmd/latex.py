@@ -110,7 +110,7 @@ def generate_pdf():
 
     # Compile LaTeX to PDF
     try:
-        subprocess.run(["xelatex", "-output-directory=cv-workspace", output_tex_file], check=True)
+        subprocess.run(["xelatex", "-output-directory=cv-workspace", output_tex_file.replace("```latex", "").replace("```","")], check=True)
         console.print(f"[bold green]PDF successfully generated: {output_pdf_file}[/bold green]")
     except subprocess.CalledProcessError as e:
         console.print(f"[bold red]Error during LaTeX compilation: {e}[bold red]")
@@ -126,7 +126,7 @@ def generate_pdf():
             
             console.print(f"[bold cyan]Re-compiling corrected LaTeX file: {output_tex_file}[/bold cyan]")
             try:
-                subprocess.run(["xelatex", "-output-directory=cv-workspace", output_tex_file], check=True)
+                subprocess.run(["xelatex", "-output-directory=cv-workspace", output_tex_file.replace("```latex", "").replace("```","")], check=True)
                 console.print(f"[bold green]PDF successfully generated after correction: {output_pdf_file}[/bold green]")
             except subprocess.CalledProcessError:
                 console.print("[bold red]Final LaTeX compilation failed. Please review the LaTeX file manually.[/bold red]")
