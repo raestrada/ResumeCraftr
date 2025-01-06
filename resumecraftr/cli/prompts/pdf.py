@@ -29,11 +29,6 @@ You are an expert at generating LaTeX documents for ATS-friendly resumes. Your t
 {latex_template}
 ```
 
-#### Extracted CV Text:
-```
-{cv_text}
-```
-
 #### Optimized CV Sections (JSON Format):
 ```json
 {optimized_sections}

@@ -65,9 +65,9 @@ def upload_files_to_vector_store(
     )
 
 
-def create_or_get_agent():
+def create_or_get_agent(name=None):
     """Create or retrieve an assistant for document processing."""
-    agent_name = "ResumeCraftr Agent"
+    agent_name = "ResumeCraftr Agent" if name is None else name
 
     assistants = client.beta.assistants.list()
     for assistant in assistants.data:
@@ -79,7 +79,8 @@ def create_or_get_agent():
     )
 
     vector_store = client.beta.vector_stores.create(name=f"{agent_name} Docs")
-    upload_files_to_vector_store(vector_store.id)
+    if agent_name == "ResumeCraftr Agent":
+        upload_files_to_vector_store(vector_store.id)
 
     assistant = client.beta.assistants.create(
         instructions="Process resumes with ATS optimization techniques.",
@@ -90,10 +91,11 @@ def create_or_get_agent():
         top_p=1.0,
     )
 
-    client.beta.assistants.update(
-        assistant_id=assistant.id,
-        tool_resources={"file_search": {"vector_store_ids": [vector_store.id]}},
-    )
+    if agent_name == "ResumeCraftr Agent":
+        client.beta.assistants.update(
+            assistant_id=assistant.id,
+            tool_resources={"file_search": {"vector_store_ids": [vector_store.id]}},
+        )
 
     console.print(
         f"[bold green]Agent '{agent_name}' created successfully.[/bold green]"
@@ -101,9 +103,9 @@ def create_or_get_agent():
     return assistant
 
 
-def execute_prompt(prompt: str) -> str:
+def execute_prompt(prompt: str, name=None) -> str:
     """Execute a given prompt using the AI agent, ensuring the vector database is refreshed."""
-    assistant = create_or_get_agent()
+    assistant =create_or_get_agent(name) 
     thread = client.beta.threads.create()
 
     client.beta.threads.messages.create(

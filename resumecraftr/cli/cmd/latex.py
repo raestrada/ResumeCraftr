@@ -14,7 +14,7 @@ LATEX_TEMPLATE = "cv-workspace/resume_template.tex"
 @click.command()
 def generate_pdf():
     """Generate a PDF resume using the optimized LaTeX template with OpenAI."""
-    create_or_get_agent()
+    create_or_get_agent("ResumeCraftr Agent PDF gen")
 
     # Load configuration
     if not os.path.exists(CONFIG_FILE):
@@ -83,7 +83,6 @@ def generate_pdf():
     prompt = (
         RAW_PROMPT.format(
             latex_template=latex_template,
-            cv_text=original_cv_text,
             optimized_sections=optimized_sections_text,
             job_description=job_description,
             language=config.get("primary_language"),
@@ -93,7 +92,7 @@ def generate_pdf():
     )
 
     # 🔹 Generate LaTeX with OpenAI
-    latex_content = execute_prompt(prompt)
+    latex_content = execute_prompt(prompt, "ResumeCraftr Agent PDF gen")
 
     if not latex_content.strip():
         console.print("[bold red]Error: OpenAI did not return a valid LaTeX document.[/bold red]")
@@ -118,7 +117,7 @@ def generate_pdf():
         
         # Use OpenAI to correct the LaTeX document
         correction_prompt = LATEX_CORRECTION.format(latex_code=latex_content, error_message=str(e))
-        corrected_latex = execute_prompt(correction_prompt)
+        corrected_latex = execute_prompt(correction_prompt, "ResumeCraftr Agent PDF gen")
         
         if corrected_latex.strip():
             with open(output_tex_file, "w", encoding="utf-8") as f:
