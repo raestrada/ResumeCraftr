@@ -5,8 +5,8 @@ import subprocess
 from rich.console import Console
 from rich.prompt import Prompt
 from rich.markdown import Markdown
-from cli.agent import execute_prompt, create_or_get_agent
-from cli.prompts.pdf import RAW_PROMPT, LATEX_CORRECTION
+from resumecraftr.cli.agent import execute_prompt, create_or_get_agent
+from resumecraftr.cli.prompts.pdf import RAW_PROMPT, LATEX_CORRECTION
 
 console = Console()
 CONFIG_FILE = "cv-workspace/resumecraftr.json"

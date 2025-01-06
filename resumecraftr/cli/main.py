@@ -3,11 +3,11 @@ import json
 import os
 import shutil
 from rich.console import Console
-from cli.cmd.pdf import extract_text
-from cli.cmd.sections import extract_sections
-from cli.cmd.jobs_desc import add_job_description
-from cli.cmd.resume import optimize_resume
-from cli.cmd.latex import generate_pdf
+from resumecraftr.cli.cmd.pdf import extract_text
+from resumecraftr.cli.cmd.sections import extract_sections
+from resumecraftr.cli.cmd.jobs_desc import add_job_description
+from resumecraftr.cli.cmd.resume import optimize_resume
+from resumecraftr.cli.cmd.latex import generate_pdf
 
 console = Console()
 

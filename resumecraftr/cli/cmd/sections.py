@@ -5,8 +5,8 @@ import click
 import concurrent.futures
 from rich.console import Console
 from rich.prompt import Prompt
-from cli.agent import execute_prompt, create_or_get_agent
-from cli.prompts.sections import RAW_PROMPTS
+from resumecraftr.cli.agent import execute_prompt, create_or_get_agent
+from resumecraftr.cli.prompts.sections import RAW_PROMPTS
 
 console = Console()
 CONFIG_FILE = "cv-workspace/resumecraftr.json"
