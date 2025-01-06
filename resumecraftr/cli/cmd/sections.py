@@ -2,6 +2,7 @@ import os
 import json
 import re
 import click
+import importlib.resources
 import concurrent.futures
 from rich.console import Console
 from rich.prompt import Prompt
@@ -10,8 +11,12 @@ from resumecraftr.cli.prompts.sections import RAW_PROMPTS
 
 console = Console()
 CONFIG_FILE = "cv-workspace/resumecraftr.json"
-SECTIONS_FILE = "templates/sections.json"
-OUTPUT_FILE = "cv-workspace/{0}.extracted_sections.json"
+try:
+    with importlib.resources.path("resumecraftr.templates", "sections.json") as sections_path:
+        SECTIONS_FILE_SRC = str(sections_path)
+except ModuleNotFoundError:
+    console.print("[bold red]Error: Could not locate the sections file inside the installed package.[/bold red]")
+SECTIONS_FILE_SRC = NoneOUTPUT_FILE = "cv-workspace/{0}.extracted_sections.json"
 
 
 def clean_json_response(response):
