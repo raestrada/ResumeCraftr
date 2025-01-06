@@ -6,65 +6,51 @@
 \usepackage{hyperref}
 \usepackage{fontspec}
 
-% Set professional font (works only with XeLaTeX)
-\setmainfont{Liberation Sans}
+\setmainfont{Arial} % Puedes cambiarlo a Liberation Sans si prefieres
 
-% Define section formatting
 \titleformat{\section}{\large\bfseries\color{blue}}{}{0em}{}
 \titleformat{\subsection}{\normalsize\bfseries\color{black}}{}{0em}{}
 
 \begin{document}
 
 \begin{center}
-    {\Huge \textbf{John Doe}}\\
-    {\large Software Engineer}\\
-    \href{mailto:john.doe@example.com}{john.doe@example.com} | (123) 456-7890 | 
-    \href{https://linkedin.com/in/johndoe}{\texttt{linkedin.com/in/johndoe}} | 
-    \href{https://github.com/johndoe}{\texttt{github.com/johndoe}}
+    {\Huge \textbf{{{Contact Information}}}}\\
+    \href{mailto:{{Email}}}{{Email}} | {{Phone Number}} | 
+    \href{https://linkedin.com/in/{{LinkedIn}}}{\texttt{https://linkedin.com/in/{{LinkedIn}}}} | 
+    \href{https://github.com/{{GitHub}}}{\texttt{https://github.com/{{GitHub}}}}
 \end{center}
 
 \hrule
 
 \section*{Summary}
-\noindent {\small A brief professional summary highlighting key skills and experience.}
+{{Summary}}
 
 \section*{Technical Skills}
 \begin{itemize}
-    \item Programming: Python, Java, C++
-    \item Frameworks: Django, Flask, React
-    \item Tools: Git, Docker, Kubernetes
+    {{Technical Skills}}
 \end{itemize}
 
 \section*{Work Experience}
-\textbf{Software Engineer} \hfill 2020 - Present\\
-Company Name, Location\\
-\begin{itemize}
-    \item Developed scalable web applications using Python and React.
-    \item Implemented CI/CD pipelines for automated deployments.
-\end{itemize}
+{{Work Experience}}
 
 \section*{Projects}
-\textbf{Project Name} \hfill Year\\
-Description of the project and technologies used.
+{{Projects}}
 
 \section*{Education}
-\textbf{Bachelor's Degree in Computer Science} \hfill Year\\
-University Name, Location
+{{Education}}
 
 \section*{Certifications}
-\textbf{AWS Certified Solutions Architect} \hfill Year
+{{Certifications}}
 
 \section*{Publications and Open Source Contributions}
-\textbf{Article/Project Name} \hfill Year\\
-Description or link to publication.
+{{Publications and Open Source Contributions}}
 
 \section*{Awards and Recognitions}
-\textbf{Award Name} \hfill Year
+{{Awards and Recognitions}}
 
 \section*{Languages}
 \begin{itemize}
-    \item English - Fluent
-    \item Spanish - Intermediate
+    {{Languages}}
 \end{itemize}
 
 \end{document}
