@@ -5,7 +5,7 @@ import click
 import concurrent.futures
 from rich.console import Console
 from rich.prompt import Prompt
-from cli.agent import execute_prompt
+from cli.agent import execute_prompt, create_or_get_agent
 from cli.prompts.resume import RAW_PROMPTS
 
 console = Console()
@@ -26,12 +26,15 @@ def clean_json_response(response):
         return None  # Retorna None si la conversión a JSON falla
 
 
-def optimize_section(section_name, content, job_description):
+def optimize_section(config, section_name, content, job_description):
     """
     Llama a OpenAI para optimizar la sección del CV en base a la descripción del trabajo.
     """
+
+    create_or_get_agent()
+
     prompt = (
-        RAW_PROMPTS["optimize_resume"]
+        RAW_PROMPTS["optimize_resume"].format(language=config.get("primary_language"))
         + "\n\n"
         + json.dumps(
             {
@@ -145,7 +148,7 @@ def optimize_resume():
     with concurrent.futures.ThreadPoolExecutor() as executor:
         future_to_section = {
             executor.submit(
-                optimize_section, section, content, job_description
+                optimize_section, config, section, content, job_description
             ): section
             for section, content in sections_content.items()
         }

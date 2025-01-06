@@ -9,6 +9,7 @@ console = Console()
 CONFIG_FILE = "cv-workspace/resumecraftr.json"
 LATEX_TEMPLATE = "cv-workspace/resume_template.tex"
 
+
 @click.command()
 @click.argument("pdf_path", type=click.Path(exists=True))
 def extract_text(pdf_path):

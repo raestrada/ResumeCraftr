@@ -42,5 +42,28 @@ You are an expert at generating LaTeX documents for ATS-friendly resumes. Your t
 ---
 
 ### Output:
-Provide **only** the final LaTeX file content, properly formatted and ready for direct compilation with `xelatex`. Do not include any markdown or explanations.
+Provide **only** the final LaTeX file content in {language}, properly formatted and ready for direct compilation with `xelatex`. Do not include any markdown or explanations.
+"""
+
+LATEX_CORRECTION = r"""
+You are an expert in LaTeX document formatting and troubleshooting. The following LaTeX document has errors that prevent it from compiling successfully.
+
+Here is the LaTeX source code that caused the issue:
+```
+{latex_code}
+```
+
+Here is the error message from the LaTeX compiler:
+```
+{error_message}
+```
+
+Your task is to:
+1. **Identify the source of the errors** based on the error message and the provided LaTeX code.
+2. **Correct only the problematic parts** while preserving the document's structure and formatting.
+3. Ensure all hyperlinks (`\href{}`), bold text (`\textbf{}`), lists, and special characters are properly escaped or formatted.
+4. Prevent overfull boxes and missing `$` symbols by adjusting long text and equations.
+5. Return only the fixed LaTeX code. Do NOT include any explanations, comments, or markdown formatting.
+
+Ensure that the output is a valid, compilable LaTeX document.
 """

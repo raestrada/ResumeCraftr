@@ -104,9 +104,6 @@ def create_or_get_agent():
 def execute_prompt(prompt: str) -> str:
     """Execute a given prompt using the AI agent, ensuring the vector database is refreshed."""
     assistant = create_or_get_agent()
-
-    """Execute a given prompt using the AI agent."""
-    assistant = create_or_get_agent()
     thread = client.beta.threads.create()
 
     client.beta.threads.messages.create(
@@ -121,4 +118,11 @@ def execute_prompt(prompt: str) -> str:
         time.sleep(1)
 
     messages = client.beta.threads.messages.list(thread_id=thread.id)
-    return messages.data[0].content[0].text.value
+    response = messages.data[0].content[0].text.value
+
+    if response.strip() == prompt.strip():
+        raise RuntimeError(
+            "[bold red]Error: OpenAI credits may have run out, as the response is identical to the prompt.[/bold red]"
+        )
+
+    return response

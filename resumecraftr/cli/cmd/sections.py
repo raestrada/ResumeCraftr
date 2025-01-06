@@ -5,7 +5,7 @@ import click
 import concurrent.futures
 from rich.console import Console
 from rich.prompt import Prompt
-from cli.agent import execute_prompt
+from cli.agent import execute_prompt, create_or_get_agent
 from cli.prompts.sections import RAW_PROMPTS
 
 console = Console()
@@ -27,7 +27,9 @@ def clean_json_response(response):
         return None  # Retorna None si la conversión a JSON falla
 
 
-def process_section(section_name, text_content, language):
+def process_section(config, section_name, text_content, language):
+    create_or_get_agent()
+    
     if section_name not in RAW_PROMPTS:
         console.print(
             f"[bold red]No prompt found for section '{section_name}'. Skipping extraction.[/bold red]"
@@ -39,7 +41,11 @@ def process_section(section_name, text_content, language):
         f"Extract the following section in {language}:\n\n" + RAW_PROMPTS[section_name]
     )
 
-    raw_result = execute_prompt(translated_prompt + "\n\n" + text_content)
+    raw_result = execute_prompt(
+        translated_prompt.format(language=config.get("primary_language")) .replace("{{", "{").replace("}}", "}")
+        + "\n\n"
+        + text_content
+    )
     parsed_result = clean_json_response(raw_result)
 
     if parsed_result is None:
@@ -105,7 +111,7 @@ def extract_sections():
     with concurrent.futures.ThreadPoolExecutor() as executor:
         future_to_section = {
             executor.submit(
-                process_section, section_info["name"], text_content, language
+                process_section, config, section_info["name"], text_content, language
             ): section_info["name"]
             for section_info in sections_config.get("sections", [])
         }

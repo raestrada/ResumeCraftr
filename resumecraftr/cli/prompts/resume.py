@@ -8,13 +8,14 @@ RAW_PROMPTS = {
     3. **Optimize for ATS (Applicant Tracking Systems)** by incorporating relevant **keywords** from the job description.
     4. **Enhance clarity and professionalism** while ensuring the section remains structured, concise, and impactful.
     5. **Do not include any extra text, explanations, or formatting**—return only the updated JSON.
+    6. Use language {language} to write the optimized sections.
 
     **Input Format:**
     ```json
-    {
+    {{
         "section_name": "string",
-        "section_content": { ... } // The JSON object to be rewritten
-    }
+        "section_content": {{ ... }} // The JSON object to be rewritten
+    }}
     ```
     
     **Job Description Format:**
@@ -27,10 +28,10 @@ RAW_PROMPTS = {
 
     **Output Format (same JSON structure as input, but with rewritten content):**
     ```json
-    {
+    {{
         "section_name": "string",
-        "section_content": { ... } // Rewritten but structurally identical JSON object
-    }
+        "section_content": {{ ... }} // Rewritten but structurally identical JSON object
+    }}
     ```
     """
 }
