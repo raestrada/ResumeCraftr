@@ -4,6 +4,7 @@ import json
 import subprocess
 from rich.console import Console
 from rich.prompt import Prompt
+from rich.markdown import Markdown
 from cli.agent import execute_prompt, create_or_get_agent
 from cli.prompts.pdf import RAW_PROMPT, LATEX_CORRECTION
 
@@ -11,11 +12,72 @@ console = Console()
 CONFIG_FILE = "cv-workspace/resumecraftr.json"
 LATEX_TEMPLATE = "cv-workspace/resume_template.tex"
 
+def check_xelatex():
+    """Check if xelatex is installed and provide installation instructions if not."""
+    try:
+        subprocess.run(["xelatex", "--version"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
+        return True
+    except (FileNotFoundError, subprocess.CalledProcessError):
+        return False
+
+def print_xelatex_installation_guide():
+    """Prints installation instructions for XeLaTeX in Markdown format using rich."""
+    instructions = """
+# 🚀 Installing XeLaTeX
+
+ResumeCraftr requires **XeLaTeX** to compile PDFs. Follow the instructions below for your system:
+
+### 🟢 Windows
+1. Download and install [MiKTeX](https://miktex.org/download).
+2. Ensure `xelatex` is in your system's PATH by running:
+   ```
+   xelatex --version
+   ```
+   If not, restart your computer or manually add the MiKTeX `bin` directory to your PATH.
+
+### 🍏 macOS
+1. Install **MacTeX** (includes XeLaTeX) via Homebrew:
+   ```
+   brew install mactex
+   ```
+2. Verify the installation:
+   ```
+   xelatex --version
+   ```
+
+### 🐧 Linux
+For Debian/Ubuntu:
+   ```
+   sudo apt update && sudo apt install texlive-xetex
+   ```
+For Arch Linux:
+   ```
+   sudo pacman -S texlive-bin
+   ```
+For Fedora:
+   ```
+   sudo dnf install texlive-xetex
+   ```
+
+After installation, re-run:
+   ```
+   xelatex --version
+   ```
+
+Once installed, retry running `resumecraftr generate-pdf`! ✅
+"""
+    console.print(Markdown(instructions))
+
 
 @click.command()
 def generate_pdf():
     """Generate a PDF resume using the optimized LaTeX template with OpenAI."""
     create_or_get_agent("ResumeCraftr Agent PDF gen")
+
+    if not check_xelatex():
+        console.print("[bold red]Error: XeLaTeX is not installed.[/bold red]")
+        print_xelatex_installation_guide()
+        return
 
     # Load configuration
     if not os.path.exists(CONFIG_FILE):
