@@ -2,6 +2,7 @@ import click
 import json
 import os
 import shutil
+import importlib.resources
 from rich.console import Console
 from resumecraftr.cli.cmd.pdf import extract_text
 from resumecraftr.cli.cmd.sections import extract_sections
@@ -12,7 +13,13 @@ from resumecraftr.cli.cmd.latex import generate_pdf
 console = Console()
 
 CONFIG_FILE = "cv-workspace/resumecraftr.json"
-TEMPLATE_SRC = "templates/resume_template.tex"
+try:
+    with importlib.resources.path("resumecraftr.templates", "resume_template.tex") as template_path:
+        TEMPLATE_SRC = str(template_path)
+except ModuleNotFoundError:
+    console.print("[bold red]Error: Could not locate the template file inside the installed package.[/bold red]")
+    TEMPLATE_SRC = None
+    
 TEMPLATE_DEST = "cv-workspace/resume_template.tex"
 
 DEFAULT_CONFIG = {
