@@ -11,7 +11,6 @@ RAW_PROMPTS = {
     }
     If any field is missing in the input, set its value to null. Do NOT include any extra text, explanations, or markdown formatting. Return ONLY the JSON object.
     """,
-
     "Summary": r"""
     Extract the professional summary from the text. The output must be a valid JSON object:
     {
@@ -19,7 +18,6 @@ RAW_PROMPTS = {
     }
     If no summary is found, set "Summary" to null. Do NOT include any additional text, explanations, or markdown formatting. Return ONLY the JSON object.
     """,
-
     "Technical Skills": r"""
     Extract a structured list of programming languages, tools, and technologies. The output must be in the following JSON format:
     {
@@ -28,7 +26,6 @@ RAW_PROMPTS = {
     }
     If no skills are found, return empty lists. Do NOT include any additional text, explanations, or markdown formatting. Return ONLY the JSON object.
     """,
-
     "Work Experience": r"""
     Extract the work experience section as a structured JSON array. Each entry must have:
     {
@@ -39,7 +36,6 @@ RAW_PROMPTS = {
     }
     If no work experience is found, return an empty list []. Do NOT include any additional text, explanations, or markdown formatting. Return ONLY the JSON array.
     """,
-
     "Projects": r"""
     Extract all projects mentioned in the text. Each project must be structured as:
     {
@@ -49,7 +45,6 @@ RAW_PROMPTS = {
     }
     If no projects are found, return an empty list []. Do NOT include any additional text, explanations, or markdown formatting. Return ONLY the JSON array.
     """,
-
     "Education": r"""
     Extract all education details. Each entry must be structured as:
     {
@@ -59,7 +54,6 @@ RAW_PROMPTS = {
     }
     If no education details are found, return an empty list []. Do NOT include any additional text, explanations, or markdown formatting. Return ONLY the JSON array.
     """,
-
     "Certifications": r"""
     Extract certifications, courses, or professional training. Each entry must be structured as:
     {
@@ -69,7 +63,6 @@ RAW_PROMPTS = {
     }
     If no certifications are found, return an empty list []. Do NOT include any additional text, explanations, or markdown formatting. Return ONLY the JSON array.
     """,
-
     "Publications & Open Source Contributions": r"""
     Extract details about publications, articles, and open-source contributions. Each entry must be structured as:
     {
@@ -78,7 +71,6 @@ RAW_PROMPTS = {
     }
     If no publications or contributions are found, return an empty list []. Do NOT include any additional text, explanations, or markdown formatting. Return ONLY the JSON array.
     """,
-
     "Awards & Recognitions": r"""
     Extract any awards or recognitions mentioned in the text. Each entry must be structured as:
     {
@@ -88,7 +80,6 @@ RAW_PROMPTS = {
     }
     If no awards are found, return an empty list []. Do NOT include any additional text, explanations, or markdown formatting. Return ONLY the JSON array.
     """,
-
     "Languages": r"""
     Extract spoken and written languages with proficiency levels. Each entry must be structured as:
     {
@@ -96,5 +87,5 @@ RAW_PROMPTS = {
         "Proficiency": "string"
     }
     If no languages are found, return an empty list []. Do NOT include any additional text, explanations, or markdown formatting. Return ONLY the JSON array.
-    """
+    """,
 }
