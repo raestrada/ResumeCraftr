@@ -1,0 +1,27 @@
+# Configuración básica de Jekyll
+title: ResumeCraftr Documentation
+description: Documentation for ResumeCraftr - Your AI-powered Resume Optimization
+baseurl: "" # Para GitHub Pages, si tu sitio está en la raíz del repositorio
+url: "https://resumecrafr.app" # Tu dominio
+remote_theme: just-the-docs/just-the-docs # Tema remoto Just the Docs
+
+# Configuración de Markdown y conversión
+markdown: kramdown
+highlighter: rouge
+
+plugins:
+  - jekyll-feed
+  - jekyll-sitemap
+
+# Archivos y carpetas a excluir
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - README.md
+
+# Configuración del layout por defecto
+defaults:
+  - scope:
+      path: ""
+    values:
+      layout: "default"

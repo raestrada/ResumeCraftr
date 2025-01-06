@@ -105,7 +105,7 @@ def create_or_get_agent(name=None):
 
 def execute_prompt(prompt: str, name=None) -> str:
     """Execute a given prompt using the AI agent, ensuring the vector database is refreshed."""
-    assistant =create_or_get_agent(name) 
+    assistant = create_or_get_agent(name)
     thread = client.beta.threads.create()
 
     client.beta.threads.messages.create(

@@ -29,7 +29,7 @@ def clean_json_response(response):
 
 def process_section(config, section_name, text_content, language):
     create_or_get_agent()
-    
+
     if section_name not in RAW_PROMPTS:
         console.print(
             f"[bold red]No prompt found for section '{section_name}'. Skipping extraction.[/bold red]"
@@ -42,7 +42,9 @@ def process_section(config, section_name, text_content, language):
     )
 
     raw_result = execute_prompt(
-        translated_prompt.format(language=config.get("primary_language")) .replace("{{", "{").replace("}}", "}")
+        translated_prompt.format(language=config.get("primary_language"))
+        .replace("{{", "{")
+        .replace("}}", "}")
         + "\n\n"
         + text_content
     )

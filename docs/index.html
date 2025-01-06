@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <link
+      rel="icon"
+      type="image/png"
+      href="https://res.cloudinary.com/dyknhuvxt/image/upload/c_thumb,w_200,g_face/v1736189459/resumecraftr_eb7drc.png"
+    />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="ResumeCraftr - Your AI-powered ATS Resume Builder" />
+    <title>ResumeCraftr - Optimize Your Resume for ATS</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f9;
+        margin: 0;
+        padding: 0;
+        text-align: center;
+        color: #333;
+      }
+
+      header {
+        background-color: #2a7f3d;
+        color: #fff;
+        padding: 1em 0;
+        position: relative;
+      }
+
+      .release-link {
+        position: absolute;
+        top: 10px;
+        left: 20px;
+        font-size: 0.9em;
+      }
+
+      .release-link a {
+        color: #fff;
+        text-decoration: none;
+        font-weight: bold;
+      }
+
+      .release-link a:hover {
+        text-decoration: underline;
+      }
+
+      nav {
+        text-align: right;
+        padding-right: 20px;
+        margin-bottom: 10px;
+      }
+
+      nav a {
+        color: #fff;
+        text-decoration: none;
+        font-weight: bold;
+        margin-left: 20px;
+      }
+
+      nav a:hover {
+        text-decoration: underline;
+      }
+
+      .floating-container {
+        position: absolute;
+        top: 60px;
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        padding: 0 20px;
+        box-sizing: border-box;
+      }
+
+      .floating-box {
+        background-color: white;
+        padding: 10px;
+        border-radius: 10px;
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .floating-box img {
+        width: 40px;
+        height: 40px;
+      }
+
+      header img {
+        max-width: 120px;
+        display: block;
+        margin: 20px auto 10px;
+      }
+
+      h1 {
+        font-size: 2.5em;
+        margin-bottom: 0.5em;
+      }
+
+      p {
+        font-size: 1.2em;
+        line-height: 1.6em;
+      }
+
+      section {
+        padding: 3em 1.5em;
+      }
+
+      .button {
+        background-color: #2a7f3d;
+        color: white;
+        padding: 0.8em 2em;
+        text-decoration: none;
+        font-weight: bold;
+        border-radius: 5px;
+        margin-top: 1em;
+        display: inline-block;
+      }
+
+      .button:hover {
+        background-color: #1f5a2a;
+      }
+
+      .install-box {
+        background-color: #fff;
+        padding: 1em;
+        border-radius: 8px;
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        display: inline-block;
+        margin-top: 1em;
+      }
+
+      .install-box code {
+        background-color: #f4f4f4;
+        padding: 0.5em;
+        border-radius: 5px;
+        display: block;
+        font-size: 1.1em;
+        color: #333;
+      }
+
+      .floating-container {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 20px;
+        padding: 0 20px;
+      }
+
+      footer {
+        margin-top: 2em;
+        padding: 2em 0;
+        background-color: #333;
+        color: #fff;
+      }
+
+      footer a {
+        color: #2a7f3d;
+        text-decoration: none;
+      }
+
+      footer a:hover {
+        color: #fff;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="release-link">
+        <a href="https://github.com/raestrada/ResumeCraftr/releases/tag/v0.1.0">Release Notes v0.1.0</a>
+      </div>
+      <nav>
+        <a href="https://storycraftr.app" class="highlight-link">Check Out StoryCraftr for Novel Writing!</a>
+        <a href="getting_started.html">Getting Started</a>
+      </nav>
+      <img src="https://res.cloudinary.com/dyknhuvxt/image/upload/v1736189459/resumecraftr_eb7drc.png" alt="ResumeCraftr Logo" />
+      <h1>Welcome to ResumeCraftr 📄✨</h1>
+      <p>Optimize your resume for ATS systems with AI-powered precision.</p>
+    </header>
+
+    <section class="floating-container">
+      <div class="floating-box">
+        <a href="https://openai.com" target="_blank">
+          <img src="https://global.discourse-cdn.com/openai1/original/3X/3/7/37b0465af49ce945753b8555462012147b0fb27a.svg" alt="OpenAI Logo" />
+          <strong>Made with OpenAI</strong>
+        </a>
+      </div>
+      <div class="floating-box">
+        <a href="https://github.com/raestrada/ResumeCraftr" target="_blank">
+          <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" alt="GitHub Logo" />
+          <strong>Explore on GitHub</strong>
+        </a>
+      </div>
+    </section>
+
+    <section>
+      <h2>Why ResumeCraftr?</h2>
+      <p>
+        ResumeCraftr helps job seekers create ATS-friendly resumes by
+        parsing, optimizing, and formatting CVs using OpenAI and LaTeX.
+      </p>
+      <h3>Installation</h3>
+      <div class="install-box">
+        <p>Install ResumeCraftr using pipx:</p>
+        <code>pipx install git+https://github.com/raestrada/ResumeCraftr.git@v0.1.0</code>
+      </div>
+    </section>
+
+    <section>
+    <h2>Join Our Community 🚀</h2>
+    <p>
+        ResumeCraftr is an open-source project, and we welcome contributions from developers, resume experts, and job seekers alike! Help improve the tool and shape the future of AI-powered resume optimization.
+    </p>
+    <a
+        href="https://github.com/raestrada/ResumeCraftr/blob/main/CONTRIBUTING.md"
+        class="button"
+        >Contribute Now</a
+    >
+    </section>      
+
+    <section
+      style="
+        background-color: #f0f0f0;
+        padding: 2em;
+        text-align: center;
+        border-top: 2px solid #4a90e2;
+      "
+    >
+      <div style="display: flex; align-items: center; justify-content: center">
+        <a href="https://aicraftr.app">
+          <img
+            src="https://res.cloudinary.com/dyknhuvxt/image/upload/v1730059761/aicraftr_qzknf4.png"
+            alt="AI Craftr Logo"
+            style="
+              max-width: 150px;
+              height: auto;
+              margin-right: 20px;
+              box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+              border-radius: 10px;
+            "
+          />
+        </a>
+
+        <div style="max-width: 600px; text-align: left">
+          <h2 style="margin: 0; color: #4a90e2">Powered by AI Craftr</h2>
+          <p style="color: #333; line-height: 1.6em; margin-top: 10px">
+            StoryCraftr is part of the <strong>AI Craftr</strong> suite, an open-source set of tools designed to assist with creative and academic writing. With AI Craftr, you can create, collaborate, and enhance your stories and academic documents, leveraging the full power of artificial intelligence. Learn more about AI Craftr and other tools at
+            <a
+              href="https://aicraftr.app"
+              style="color: #4a90e2; text-decoration: none; font-weight: bold"
+              >https://aicraftr.app</a
+            >.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <p>&copy; 2024 ResumeCraftr. All rights reserved.</p>
+    </footer>
+  </body>
+</html>
