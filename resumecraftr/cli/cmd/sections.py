@@ -1,5 +1,6 @@
 import os
 import json
+import re
 import click
 import concurrent.futures
 from rich.console import Console
@@ -10,16 +11,35 @@ from cli.prompts.sections import RAW_PROMPTS
 console = Console()
 CONFIG_FILE = "cv-workspace/resumecraftr.json"
 SECTIONS_FILE = "templates/sections.json"
-OUTPUT_FILE = "cv-workspace/extracted_sections.json"
+OUTPUT_FILE = "cv-workspace/{0}.extracted_sections.json"
+
+def clean_json_response(response):
+    """
+    Extrae solo el JSON válido de una respuesta de OpenAI eliminando cualquier texto adicional.
+    """
+    try:
+        match = re.search(r"(\{.*\}|\[.*\])", response, re.DOTALL)
+        if match:
+            return json.loads(match.group(0))  # Convierte el JSON a objeto Python
+        return None  # Retorna None si no encuentra JSON válido
+    except json.JSONDecodeError:
+        return None  # Retorna None si la conversión a JSON falla
 
 def process_section(section_name, text_content, language):
     if section_name not in RAW_PROMPTS:
         console.print(f"[bold red]No prompt found for section '{section_name}'. Skipping extraction.[/bold red]")
         return section_name, None
-    
+
     console.print(f"[cyan]Extracting {section_name} in {language}...[/cyan]")
     translated_prompt = f"Extract the following section in {language}:\n\n" + RAW_PROMPTS[section_name]
-    return section_name, execute_prompt(translated_prompt + "\n\n" + text_content)
+    
+    raw_result = execute_prompt(translated_prompt + "\n\n" + text_content)
+    parsed_result = clean_json_response(raw_result)
+
+    if parsed_result is None:
+        console.print(f"[bold red]Failed to parse JSON for section '{section_name}'. Skipping.[/bold red]")
+    
+    return section_name, parsed_result  # Devuelve el objeto JSON o None
 
 @click.command()
 def extract_sections():
@@ -68,11 +88,13 @@ def extract_sections():
         
         for future in concurrent.futures.as_completed(future_to_section):
             section_name, result = future.result()
-            if result:
+            if result is not None:  # Solo guardar si es JSON válido
                 extracted_data[section_name] = result
+
+    output_path = OUTPUT_FILE.format(file_to_process.replace(".txt", "").replace(".extracted_sections.json", ""))
     
-    with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
-        json.dump(extracted_data, f, indent=4)
+    with open(output_path, "w", encoding="utf-8") as f:
+        json.dump(extracted_data, f, indent=4, ensure_ascii=False)
     
     console.print(f"[bold green]Extracted sections saved to: {OUTPUT_FILE}[/bold green]")
 

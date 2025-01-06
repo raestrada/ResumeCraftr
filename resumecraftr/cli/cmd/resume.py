@@ -1,5 +1,6 @@
 import os
 import json
+import re
 import click
 import concurrent.futures
 from rich.console import Console
@@ -11,10 +12,40 @@ console = Console()
 CONFIG_FILE = "cv-workspace/resumecraftr.json"
 OUTPUT_FILE = "cv-workspace/{0}.optimized_sections.json"
 
+def clean_json_response(response):
+    """
+    Extrae solo el JSON válido de la respuesta de OpenAI eliminando cualquier texto adicional.
+    """
+    try:
+        match = re.search(r"(\{.*\}|\[.*\])", response, re.DOTALL)
+        if match:
+            return json.loads(match.group(0))  # Convierte el JSON a objeto Python
+        return None  # Retorna None si no encuentra JSON válido
+    except json.JSONDecodeError:
+        return None  # Retorna None si la conversión a JSON falla
+
+def optimize_section(section_name, content, job_description):
+    """
+    Llama a OpenAI para optimizar la sección del CV en base a la descripción del trabajo.
+    """
+    prompt = RAW_PROMPTS["optimize_resume"] + "\n\n" + json.dumps({
+        "section_name": section_name,
+        "section_content": content,
+        "job_description": job_description
+    }, indent=4)
+
+    raw_result = execute_prompt(prompt)
+    parsed_result = clean_json_response(raw_result)
+
+    if parsed_result is None:
+        console.print(f"[bold red]Failed to parse JSON for section '{section_name}'. Skipping.[/bold red]")
+    
+    return section_name, parsed_result  # Devuelve el JSON limpio o None
+
 @click.command()
 def optimize_resume():
     """Optimize a resume based on a job description."""
-    # Load configuration
+    # Cargar configuración
     if not os.path.exists(CONFIG_FILE):
         console.print("[bold red]Configuration file not found. Run 'resumecraftr init' first.[/bold red]")
         return
@@ -33,7 +64,7 @@ def optimize_resume():
         console.print("[bold red]No job descriptions found in configuration.[/bold red]")
         return
     
-    # Let the user choose files
+    # Seleccionar archivos
     extracted_files = [f.replace('.txt', '.extracted_sections.json') for f in extracted_files]
     sections_file = extracted_files[0]
     job_desc_file = job_descriptions[0]
@@ -73,28 +104,25 @@ def optimize_resume():
     
     console.print("[cyan]Processing optimization in parallel...[/cyan]")
     
-    def optimize_section(section_name, content):
-        prompt = RAW_PROMPTS["optimize_resume"] + "\n\n" + json.dumps({
-            "section_name": section_name,
-            "content": content,
-            "job_description": job_description
-        }, indent=4)
-        return section_name, execute_prompt(prompt)
-    
     optimized_resume = {}
     
     with concurrent.futures.ThreadPoolExecutor() as executor:
-        future_to_section = {executor.submit(optimize_section, section, content): section for section, content in sections_content.items()}
+        future_to_section = {
+            executor.submit(optimize_section, section, content, job_description): section
+            for section, content in sections_content.items()
+        }
         
         for future in concurrent.futures.as_completed(future_to_section):
             section_name, result = future.result()
-            if result:
+            if result is not None:  # Solo guardar si es JSON válido
                 optimized_resume[section_name] = result
     
-    with open(OUTPUT_FILE.format(sections_file.replace(".txt", "").replace(".extracted_sections.json", "")), "w", encoding="utf-8") as f:
-        json.dump(optimized_resume, f, indent=4)
+    output_path = OUTPUT_FILE.format(sections_file.replace(".txt", "").replace(".extracted_sections.json", ""))
     
-    console.print(f"[bold green]Optimized resume saved to: {OUTPUT_FILE}[/bold green]")
+    with open(output_path, "w", encoding="utf-8") as f:
+        json.dump(optimized_resume, f, indent=4, ensure_ascii=False)
+    
+    console.print(f"[bold green]Optimized resume saved to: {output_path}[/bold green]")
 
 if __name__ == "__main__":
     optimize_resume()

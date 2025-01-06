@@ -58,7 +58,6 @@ def upload_files_to_vector_store(vector_store_id: str, progress: Progress = None
 def create_or_get_agent():
     """Create or retrieve an assistant for document processing."""
     agent_name = "ResumeCraftr Agent"
-    console.print(f"[bold blue]Searching for existing agent '{agent_name}'...[/bold blue]")
     
     assistants = client.beta.assistants.list()
     for assistant in assistants.data:
