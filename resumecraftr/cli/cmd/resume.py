@@ -1,6 +1,5 @@
 import os
 import json
-import sys
 import click
 import concurrent.futures
 from rich.console import Console
@@ -12,6 +11,7 @@ from resumecraftr.cli.utils.json import clean_json_response, merge_json_files
 console = Console()
 CONFIG_FILE = "cv-workspace/resumecraftr.json"
 OUTPUT_FILE = "cv-workspace/{0}.optimized_sections.json"
+
 
 def optimize_section(config, section_name, content, job_description):
     """

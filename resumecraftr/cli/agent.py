@@ -122,7 +122,7 @@ def execute_prompt(prompt: str, name=None) -> str:
     )
 
     console.print("[yellow]⏳ Waiting for OpenAI response...[/yellow]")
-    
+
     while run.status in ["queued", "in_progress"]:
         run = client.beta.threads.runs.retrieve(thread_id=thread.id, run_id=run.id)
         time.sleep(1)
@@ -136,7 +136,9 @@ def execute_prompt(prompt: str, name=None) -> str:
         console.print(
             "[bold red]⚠️ Error: OpenAI credits may have run out, as the response is identical to the prompt.[/bold red]"
         )
-        raise RuntimeError("OpenAI response is identical to the prompt. Possible credit exhaustion.")
+        raise RuntimeError(
+            "OpenAI response is identical to the prompt. Possible credit exhaustion."
+        )
 
     console.print("[bold green]✅ Processing completed successfully![/bold green]")
 

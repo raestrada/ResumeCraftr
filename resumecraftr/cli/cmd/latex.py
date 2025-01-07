@@ -12,13 +12,20 @@ console = Console()
 CONFIG_FILE = "cv-workspace/resumecraftr.json"
 LATEX_TEMPLATE = "cv-workspace/resume_template.tex"
 
+
 def check_xelatex():
     """Check if xelatex is installed and provide installation instructions if not."""
     try:
-        subprocess.run(["xelatex", "--version"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
+        subprocess.run(
+            ["xelatex", "--version"],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            check=True,
+        )
         return True
     except (FileNotFoundError, subprocess.CalledProcessError):
         return False
+
 
 def print_xelatex_installation_guide():
     """Prints installation instructions for XeLaTeX in Markdown format using rich."""

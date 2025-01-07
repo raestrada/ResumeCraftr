@@ -14,10 +14,14 @@ from resumecraftr.cli.utils.json import clean_json_response
 console = Console()
 CONFIG_FILE = "cv-workspace/resumecraftr.json"
 try:
-    with importlib.resources.path("resumecraftr.templates", "sections.json") as sections_path:
+    with importlib.resources.path(
+        "resumecraftr.templates", "sections.json"
+    ) as sections_path:
         SECTIONS_FILE = str(sections_path)
 except ModuleNotFoundError:
-    console.print("[bold red]Error: Could not locate the sections file inside the installed package.[/bold red]")
+    console.print(
+        "[bold red]Error: Could not locate the sections file inside the installed package.[/bold red]"
+    )
 OUTPUT_FILE = "cv-workspace/{0}.extracted_sections.json"
 
 

@@ -14,12 +14,16 @@ console = Console()
 
 CONFIG_FILE = "cv-workspace/resumecraftr.json"
 try:
-    with importlib.resources.path("resumecraftr.templates", "resume_template.tex") as template_path:
+    with importlib.resources.path(
+        "resumecraftr.templates", "resume_template.tex"
+    ) as template_path:
         TEMPLATE_SRC = str(template_path)
 except ModuleNotFoundError:
-    console.print("[bold red]Error: Could not locate the template file inside the installed package.[/bold red]")
+    console.print(
+        "[bold red]Error: Could not locate the template file inside the installed package.[/bold red]"
+    )
     TEMPLATE_SRC = None
-    
+
 TEMPLATE_DEST = "cv-workspace/resume_template.tex"
 
 DEFAULT_CONFIG = {
