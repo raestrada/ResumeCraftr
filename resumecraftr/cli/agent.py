@@ -1,7 +1,7 @@
 import os
 import glob
 import time
-import openai
+import json
 from openai import OpenAI
 from rich.console import Console
 from rich.progress import Progress
@@ -11,7 +11,31 @@ client = OpenAI()
 
 CV_WORKSPACE = "cv-workspace"
 SUPPORTED_EXTENSIONS = (".md", ".txt", ".doc", ".docx", ".pdf")
+CONFIG_FILE = "cv-workspace/resumecraftr.json"
 
+def delete_all_resumecraftr_agents():
+    """
+    Deletes all OpenAI agents whose names start with 'ResumeCraftr'.
+
+    Returns:
+        None
+    """
+    try:
+        console.print("[bold cyan]Fetching agents to delete those starting with 'ResumeCraftr'...[/bold cyan]")
+        agents = client.beta.assistants.list()
+        matching_agents = [agent for agent in agents.data if agent.name.startswith("ResumeCraftr")]
+
+        if not matching_agents:
+            console.print("[bold yellow]No agents found starting with 'ResumeCraftr'.[/bold yellow]")
+            return
+
+        for agent in matching_agents:
+            console.print(f"[bold yellow]Deleting agent '{agent.name}'...[/bold yellow]")
+            client.beta.assistants.delete(assistant_id=agent.id)
+            console.print(f"[bold green]Agent '{agent.name}' successfully deleted![/bold green]")
+
+    except Exception as e:
+        console.print(f"[bold red]Error deleting agents: {e}[/bold red]")
 
 def get_vector_store_id_by_name(agent_name: str) -> str:
     """Retrieve the vector store ID by the agent's name."""
@@ -67,6 +91,15 @@ def upload_files_to_vector_store(
 
 def create_or_get_agent(name=None):
     """Create or retrieve an assistant for document processing."""
+    if not os.path.exists(CONFIG_FILE):
+        console.print(
+            "[bold red]Configuration file not found. Run 'resumecraftr init' first.[/bold red]"
+        )
+        return
+
+    with open(CONFIG_FILE, "r", encoding="utf-8") as f:
+        config = json.load(f)
+
     agent_name = "ResumeCraftr Agent" if name is None else name
 
     assistants = client.beta.assistants.list()
@@ -86,9 +119,9 @@ def create_or_get_agent(name=None):
         instructions="Process resumes with ATS optimization techniques.",
         name=agent_name,
         tools=[{"type": "file_search"}],
-        model="gpt-4o",
-        temperature=0.7,
-        top_p=1.0,
+        model=config["chat_gpt"]["model"],
+        temperature=config["chat_gpt"]["temperature"],
+        top_p=config["chat_gpt"]["top_p"],
     )
 
     if agent_name == "ResumeCraftr Agent":

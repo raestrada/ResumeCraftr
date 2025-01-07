@@ -26,8 +26,6 @@ OUTPUT_FILE = "cv-workspace/{0}.extracted_sections.json"
 
 
 def process_section(config, section_name, text_content, language):
-    create_or_get_agent()
-
     if section_name not in RAW_PROMPTS:
         console.print(
             f"[bold red]No prompt found for section '{section_name}'. Skipping extraction.[/bold red]"
@@ -68,6 +66,8 @@ def extract_sections():
 
     with open(CONFIG_FILE, "r", encoding="utf-8") as f:
         config = json.load(f)
+
+    create_or_get_agent()
 
     extracted_files = config.get("extracted_files", [])
     language = config.get("primary_language", "EN")

@@ -4,15 +4,19 @@ import os
 import shutil
 import importlib.resources
 from rich.console import Console
+from rich.progress import SpinnerColumn, TextColumn, Progress
 from resumecraftr.cli.cmd.pdf import extract_text
 from resumecraftr.cli.cmd.sections import extract_sections
 from resumecraftr.cli.cmd.jobs_desc import add_job_description
 from resumecraftr.cli.cmd.resume import optimize_resume
 from resumecraftr.cli.cmd.latex import generate_pdf
+from resumecraftr.cli.agent import delete_all_resumecraftr_agents
 
 console = Console()
 
 CONFIG_FILE = "cv-workspace/resumecraftr.json"
+CUSTOM_FILE = "cv-workspace/custom.md"
+
 try:
     with importlib.resources.path(
         "resumecraftr.templates", "resume_template.tex"
@@ -43,7 +47,10 @@ def cli():
 @click.option(
     "--language", default="EN", show_default=True, help="Language of the CV (EN or ES)"
 )
-def init(language):
+@click.option(
+    "--gpt-model", default="gpt-4o", show_default=True, help="chatGPT Model"
+)
+def init(language, gpt_model):
     """Initialize a new CV workspace with an optional language setting"""
     workspace_dir = "cv-workspace"
     os.makedirs(workspace_dir, exist_ok=True)
@@ -59,6 +66,11 @@ def init(language):
     # Configuración inicial
     config = DEFAULT_CONFIG.copy()
     config["primary_language"] = language
+    config["chat_gpt"] = {
+        "model": gpt_model,
+        "temperature": 0.7,
+        "top_p": 1.0
+    }
 
     # Guardar configuración
     if not os.path.exists(CONFIG_FILE):
@@ -91,6 +103,13 @@ def init(language):
                     f"[bold yellow]Updated config file with missing fields in:[/bold yellow] {CONFIG_FILE}"
                 )
 
+    if not os.path.exists(CUSTOM_FILE):
+        with open(CUSTOM_FILE, "w", encoding="utf-8") as config_file:
+            config_file.writelines("PUT HERE YOUR COMPLEMENTARY INFO AND INSTRUCTIONS")
+        console.print(
+            f"[bold green]CUSTOM initialized with empty:[/bold green] {CONFIG_FILE}"
+        )
+
     # Copiar plantilla LaTeX si no existe
     if os.path.exists(TEMPLATE_SRC) and not os.path.exists(TEMPLATE_DEST):
         shutil.copy(TEMPLATE_SRC, TEMPLATE_DEST)
@@ -104,8 +123,32 @@ def init(language):
             f"[bold yellow]Template already exists in workspace:[/bold yellow] {TEMPLATE_DEST}"
         )
 
+@click.command()
+def delete_agents():
+    """
+    Deletes all OpenAI agents whose names start with 'ResumeCraftr'.
+    """
+    try:
+        console.print("[bold cyan]🔄 Searching for agents starting with 'ResumeCraftr'...[/bold cyan]")
+        
+        with Progress(
+            SpinnerColumn(),
+            TextColumn("[progress.description]{task.description}"),
+            console=console,
+        ) as progress:
+            task = progress.add_task("[yellow]Processing request...", total=None)
+            
+            # Call the function to delete agents
+            delete_all_resumecraftr_agents()
+            
+            progress.update(task, description="[bold green]✅ All matching agents deleted successfully![/bold green]")
+            progress.stop()
+
+    except Exception as e:
+        console.print(f"[bold red]❌ Error while deleting agents: {e}[/bold red]")
 
 cli.add_command(init)
+cli.add_command(delete_agents)
 cli.add_command(extract_text, name="extract")
 cli.add_command(extract_sections, name="extract-sections")
 cli.add_command(add_job_description, name="add-job-description")

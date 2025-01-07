@@ -29,7 +29,7 @@ You are an expert at generating LaTeX documents for ATS-friendly resumes. Your t
 {latex_template}
 ```
 
-#### Optimized CV Sections (JSON Format):
+#### Optimized CV Sections (JSON Format) (USE IT TO COMPLEMENT DATA AND FOLLOW INSTRUCTIONS):
 ```json
 {optimized_sections}
 ```
@@ -38,11 +38,13 @@ You are an expert at generating LaTeX documents for ATS-friendly resumes. Your t
 ```
 {job_description}
 ```
+#### CUSTOM USER INPUT INSTRUCTIONS AND DATA
 
----
-
+```markdown
+{custom}
+```
 ### Output:
-Provide **only** the final LaTeX file content in {language}, properly formatted and ready for direct compilation with `xelatex`. Do not include any markdown or explanations.
+Provide **only** the final LaTeX file content in {language}, properly formatted and ready for direct compilation with `xelatex`. Do not include any markdown or explanations. Ensure the output is **pure LaTeX code**, without markdown wrappers (e.g., no triple backticks ` ``` `). Do not markdown code box, use RAW Latex text
 """
 
 LATEX_CORRECTION = r"""
@@ -61,7 +63,7 @@ Here is the error message from the LaTeX compiler:
 Your task is to:
 1. **Identify the source of the errors** based on the error message and the provided LaTeX code.
 2. **Correct only the problematic parts** while preserving the document's structure and formatting.
-3. Ensure all hyperlinks (`\href{}`), bold text (`\textbf{}`), lists, and special characters are properly escaped or formatted.
+3. Ensure all hyperlinks (`\href{{}}`), bold text (`\textbf{{}}`), lists, and special characters are properly escaped or formatted.
 4. Prevent overfull boxes and missing `$` symbols by adjusting long text and equations.
 5. Return only the fixed LaTeX code. Do NOT include any explanations, comments, or markdown formatting.
 

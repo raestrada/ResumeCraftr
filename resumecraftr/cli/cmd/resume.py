@@ -18,8 +18,6 @@ def optimize_section(config, section_name, content, job_description):
     Llama a OpenAI para optimizar la sección del CV en base a la descripción del trabajo.
     """
 
-    create_or_get_agent()
-
     prompt = (
         RAW_PROMPTS["optimize_resume"].format(language=config.get("primary_language"))
         + "\n\n"
@@ -53,6 +51,8 @@ def optimize_resume():
             "[bold red]Configuration file not found. Run 'resumecraftr init' first.[/bold red]"
         )
         return
+
+    create_or_get_agent()
 
     with open(CONFIG_FILE, "r", encoding="utf-8") as f:
         config = json.load(f)

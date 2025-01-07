@@ -11,6 +11,8 @@ from resumecraftr.cli.prompts.pdf import RAW_PROMPT, LATEX_CORRECTION
 console = Console()
 CONFIG_FILE = "cv-workspace/resumecraftr.json"
 LATEX_TEMPLATE = "cv-workspace/resume_template.tex"
+CUSTOM_PROMPT = "cv-workspace/custom.md"
+
 
 
 def check_xelatex():
@@ -96,6 +98,9 @@ def generate_pdf():
     with open(CONFIG_FILE, "r", encoding="utf-8") as f:
         config = json.load(f)
 
+    with open(CUSTOM_PROMPT, "r", encoding="utf-8") as f:
+        custom_promt = f.readlines()
+
     extracted_files = config.get("extracted_files", [])
     if not extracted_files:
         console.print(
@@ -176,6 +181,7 @@ def generate_pdf():
             optimized_sections=optimized_sections_text,
             job_description=job_description,
             language=config.get("primary_language"),
+            custom=custom_promt
         )
         .replace("{{", "{")
         .replace("}}", "}")
@@ -197,7 +203,7 @@ def generate_pdf():
     output_pdf_file = output_tex_file.replace(".tex", ".pdf")
 
     with open(output_tex_file, "w", encoding="utf-8") as f:
-        f.write(latex_content)
+        f.write(latex_content.replace("```latex", "").replace("```", ""))
 
     console.print(f"[bold cyan]Compiling LaTeX file: {output_tex_file}[/bold cyan]")
 
@@ -206,8 +212,9 @@ def generate_pdf():
         subprocess.run(
             [
                 "xelatex",
+                "-interaction=nonstopmode",
                 "-output-directory=cv-workspace",
-                output_tex_file.replace("```latex", "").replace("```", ""),
+                output_tex_file,
             ],
             check=True,
         )
@@ -223,14 +230,14 @@ def generate_pdf():
         # Use OpenAI to correct the LaTeX document
         correction_prompt = LATEX_CORRECTION.format(
             latex_code=latex_content, error_message=str(e)
-        )
+        ).replace("{{","{").replace("}}","}")
         corrected_latex = execute_prompt(
             correction_prompt, "ResumeCraftr Agent PDF gen"
         )
 
         if corrected_latex.strip():
             with open(output_tex_file, "w", encoding="utf-8") as f:
-                f.write(corrected_latex)
+                f.write(corrected_latex.replace("```latex", "").replace("```", ""))
 
             console.print(
                 f"[bold cyan]Re-compiling corrected LaTeX file: {output_tex_file}[/bold cyan]"
@@ -239,8 +246,9 @@ def generate_pdf():
                 subprocess.run(
                     [
                         "xelatex",
+                        "-interaction=nonstopmode",
                         "-output-directory=cv-workspace",
-                        output_tex_file.replace("```latex", "").replace("```", ""),
+                        output_tex_file,
                     ],
                     check=True,
                 )
