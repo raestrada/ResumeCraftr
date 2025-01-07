@@ -9,7 +9,7 @@ ResumeCraftr is an ATS-focused minimalist CV generator that leverages OpenAI and
 Ensure you have `pipx` installed, then install ResumeCraftr with:
 
 ```bash
-pipx install git+https://github.com/raestrada/ResumeCraftr.git@v0.1.0
+pipx install git+https://github.com/raestrada/ResumeCraftr.git@v0.2.0
 ```
 
 Additionally, make sure you have a LaTeX distribution installed, specifically one that includes `xelatex`.

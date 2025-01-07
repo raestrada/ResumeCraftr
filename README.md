@@ -10,9 +10,9 @@ Welcome to [**ResumeCraftr**](https://resumecraftr.app), the open-source tool de
 
 ---
 
-## Release Notes v0.1.0
+## Release Notes v0.2.0
 
-You can find the release notes for version `v0.1.0` [here](https://github.com/raestrada/ResumeCraftr/releases/tag/v0.1.0).
+You can find the release notes for version `v0.2.0` [here](https://github.com/raestrada/ResumeCraftr/releases/tag/v0.2.0).
 
 ## Step 1: Install ResumeCraftr
 
@@ -21,7 +21,7 @@ First, install **ResumeCraftr** using [pipx](https://pypa.github.io/pipx/), a to
 To install **ResumeCraftr**, run:
 
 ```bash
-pipx install git+https://github.com/raestrada/ResumeCraftr.git@v0.1.0
+pipx install git+https://github.com/raestrada/ResumeCraftr.git@v0.2.0
 ```
 
 ## Quick Examples
