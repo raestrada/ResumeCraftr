@@ -1,6 +1,6 @@
 import os
 import json
-import re
+import sys
 import click
 import concurrent.futures
 from rich.console import Console
@@ -132,18 +132,45 @@ def optimize_resume():
 
     optimized_resume = {}
 
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        future_to_section = {
-            executor.submit(
-                optimize_section, config, section, content, job_description
-            ): section
-            for section, content in sections_content.items()
-        }
+    console.print("[bold cyan]🚀 Starting resume optimization...[/bold cyan]")
 
-        for future in concurrent.futures.as_completed(future_to_section):
-            section_name, result = future.result()
-            if result is not None:  # Solo guardar si es JSON válido
-                optimized_resume[section_name] = result
+    with Progress(
+        SpinnerColumn(),
+        TextColumn("[progress.description]{task.description}"),
+        console=console,
+    ) as progress:
+        task = progress.add_task("[yellow]⏳ Optimizing sections...", total=len(sections_content))
+
+        try:
+            with concurrent.futures.ThreadPoolExecutor() as executor:
+                future_to_section = {
+                    executor.submit(
+                        optimize_section, config, section, content, job_description
+                    ): section
+                    for section, content in sections_content.items()
+                }
+
+                for future in concurrent.futures.as_completed(future_to_section):
+                    section_name = future_to_section[future]
+                    try:
+                        result = future.result()
+                        if result is not None:  # Solo guardar si es JSON válido
+                            optimized_resume[section_name] = result
+                            progress.update(task, advance=1, description=f"[green]✅ Optimized {section_name}")
+                        else:
+                            console.print(f"[bold yellow]⚠️ Warning: No valid output for section '{section_name}'[/bold yellow]")
+
+                    except Exception as e:
+                        console.print(f"[bold red]❌ Error optimizing section '{section_name}': {e}[/bold red]")
+                        executor.shutdown(wait=False)  # 🔴 Cierra inmediatamente todas las tareas en ejecución
+                        sys.exit(1)  # 🚨 Sal del programa con código de error
+
+        except Exception as e:
+            console.print(f"[bold red]❌ Critical error: {e}[/bold red]")
+            sys.exit(1)  # 🚨 Salida inmediata si ocurre un error general
+
+    progress.update(task, description="[bold green]🎉 All sections optimized successfully![/bold green]")
+    progress.stop()
 
     output_path = OUTPUT_FILE.format(
         sections_file.replace(".txt", "").replace(".extracted_sections.json", "")
