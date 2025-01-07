@@ -7,24 +7,11 @@ from rich.console import Console
 from rich.prompt import Prompt
 from resumecraftr.cli.agent import execute_prompt, create_or_get_agent
 from resumecraftr.cli.prompts.resume import RAW_PROMPTS
+from resumecraftr.cli.utils.json import clean_json_response, merge_json_files
 
 console = Console()
 CONFIG_FILE = "cv-workspace/resumecraftr.json"
 OUTPUT_FILE = "cv-workspace/{0}.optimized_sections.json"
-
-
-def clean_json_response(response):
-    """
-    Extrae solo el JSON válido de la respuesta de OpenAI eliminando cualquier texto adicional.
-    """
-    try:
-        match = re.search(r"(\{.*\}|\[.*\])", response, re.DOTALL)
-        if match:
-            return json.loads(match.group(0))  # Convierte el JSON a objeto Python
-        return None  # Retorna None si no encuentra JSON válido
-    except json.JSONDecodeError:
-        return None  # Retorna None si la conversión a JSON falla
-
 
 def optimize_section(config, section_name, content, job_description):
     """
@@ -164,6 +151,8 @@ def optimize_resume():
 
     with open(output_path, "w", encoding="utf-8") as f:
         json.dump(optimized_resume, f, indent=4, ensure_ascii=False)
+
+    merge_json_files(output_path, sections_path, output_path)
 
     console.print(f"[bold green]Optimized resume saved to: {output_path}[/bold green]")
 

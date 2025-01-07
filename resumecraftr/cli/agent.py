@@ -104,9 +104,14 @@ def create_or_get_agent(name=None):
 
 
 def execute_prompt(prompt: str, name=None) -> str:
-    """Execute a given prompt using the AI agent, ensuring the vector database is refreshed."""
+    """
+    Execute a given prompt using the AI agent, ensuring the vector database is refreshed.
+    Provides real-time feedback to the user using Rich.
+    """
     assistant = create_or_get_agent(name)
     thread = client.beta.threads.create()
+
+    console.print("[bold cyan]🔄 Sending prompt to OpenAI...[/bold cyan]")
 
     client.beta.threads.messages.create(
         thread_id=thread.id, role="user", content=prompt
@@ -115,16 +120,24 @@ def execute_prompt(prompt: str, name=None) -> str:
     run = client.beta.threads.runs.create(
         thread_id=thread.id, assistant_id=assistant.id
     )
+
+    console.print("[yellow]⏳ Waiting for OpenAI response...[/yellow]")
+    
     while run.status in ["queued", "in_progress"]:
         run = client.beta.threads.runs.retrieve(thread_id=thread.id, run_id=run.id)
         time.sleep(1)
+
+    console.print("[bold green]✅ Response received![/bold green]")
 
     messages = client.beta.threads.messages.list(thread_id=thread.id)
     response = messages.data[0].content[0].text.value
 
     if response.strip() == prompt.strip():
-        raise RuntimeError(
-            "[bold red]Error: OpenAI credits may have run out, as the response is identical to the prompt.[/bold red]"
+        console.print(
+            "[bold red]⚠️ Error: OpenAI credits may have run out, as the response is identical to the prompt.[/bold red]"
         )
+        raise RuntimeError("OpenAI response is identical to the prompt. Possible credit exhaustion.")
+
+    console.print("[bold green]✅ Processing completed successfully![/bold green]")
 
     return response

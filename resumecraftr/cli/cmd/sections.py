@@ -8,6 +8,8 @@ from rich.console import Console
 from rich.prompt import Prompt
 from resumecraftr.cli.agent import execute_prompt, create_or_get_agent
 from resumecraftr.cli.prompts.sections import RAW_PROMPTS
+from resumecraftr.cli.utils.json import clean_json_response
+
 
 console = Console()
 CONFIG_FILE = "cv-workspace/resumecraftr.json"
@@ -17,18 +19,6 @@ try:
 except ModuleNotFoundError:
     console.print("[bold red]Error: Could not locate the sections file inside the installed package.[/bold red]")
 OUTPUT_FILE = "cv-workspace/{0}.extracted_sections.json"
-
-def clean_json_response(response):
-    """
-    Extrae solo el JSON válido de una respuesta de OpenAI eliminando cualquier texto adicional.
-    """
-    try:
-        match = re.search(r"(\{.*\}|\[.*\])", response, re.DOTALL)
-        if match:
-            return json.loads(match.group(0))  # Convierte el JSON a objeto Python
-        return None  # Retorna None si no encuentra JSON válido
-    except json.JSONDecodeError:
-        return None  # Retorna None si la conversión a JSON falla
 
 
 def process_section(config, section_name, text_content, language):
