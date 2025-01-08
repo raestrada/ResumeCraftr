@@ -162,6 +162,125 @@
       footer a:hover {
         color: #fff;
       }
+
+      .vscode-logo,
+      .openai-logo,
+      .github-logo {
+        position: absolute;
+        top: 50px;
+        background-color: white;
+        padding: 10px;
+        border-radius: 10px;
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        z-index: 10;
+      }
+
+      .openai-logo {
+        left: 20px;
+        width: 120px; /* Ajuste del ancho del contenedor OpenAI */
+      }
+
+      .github-logo {
+        right: 20px;
+        display: flex;
+        align-items: center;
+        padding: 10px 15px; /* Más espacio para el logo y texto */
+      }
+
+      .vscode-logo {
+        top: 120px;
+        right: 20px;
+        display: flex;
+        align-items: center;
+        padding: 10px 15px; /* Más espacio para el logo y texto */
+      }
+
+      .openai-logo img {
+        width: 100%; /* El logo de OpenAI ocupa todo el ancho del contenedor */
+        height: auto;
+      }
+
+      .github-logo img {
+        width: 40px; /* Tamaño cuadrado para el logo de GitHub */
+        height: 40px; /* Mismo tamaño de ancho y alto */
+      }
+
+      .vscode-logo img {
+        width: 40px; /* Tamaño cuadrado para el logo de GitHub */
+        height: 40px; /* Mismo tamaño de ancho y alto */
+      }
+
+      .vscode-logo p,
+      .openai-logo p,
+      .github-logo p {
+        margin: 5px 0 0;
+        font-size: 12px;
+        color: #333;
+      }
+
+      .vscode-logo a,
+      .openai-logo a,
+      .github-logo a {
+        text-decoration: none;
+        color: #333;
+      }
+
+      .vscode-logo a:hover,
+      .openai-logo a:hover,
+      .github-logo a:hover {
+        color: #4a90e2;
+      }
+
+      @media (max-width: 768px) {
+        .vscode-logo,
+        .openai-logo,
+        .github-logo {
+          display: none; /* Ocultar los logos en pantallas más pequeñas */
+        }
+      }
+
+      .highlight-link {
+        background-color: #4a90e2; /* Fondo azul */
+        color: #fff;
+        padding: 0.5em 1em;
+        border-radius: 5px;
+        font-weight: bold;
+        text-decoration: none;
+        transition:
+          background-color 0.3s ease,
+          transform 0.3s ease;
+        display: inline-block;
+        margin-right: 20px;
+      }
+
+      .highlight-link:hover {
+        background-color: #357abd; /* Azul más oscuro en hover */
+        transform: scale(1.05); /* Agrandamiento en hover */
+      }
+
+      .coming-soon {
+        background-color: #ffcc00;
+        color: #333;
+        padding: 1em;
+        font-size: 1.5em;
+        font-weight: bold;
+        margin-top: 2em;
+        border-radius: 5px;
+      }
+
+      .coming-soon code {
+        display: block;
+        margin-top: 0.5em;
+        padding: 0.5em;
+        background-color: #fff6cc;
+        color: #333;
+        border-radius: 5px;
+        font-family: monospace;
+        word-wrap: break-word; /* Permite que el texto largo se ajuste en varias líneas */
+        white-space: pre-wrap; /* Mantiene los saltos de línea pero permite ajustar el texto */
+        overflow-wrap: break-word; /* Otra opción para asegurar que las palabras largas se ajusten */
+      }
     </style>
   </head>
   <body>
@@ -178,20 +297,31 @@
       <p>Optimize your resume for ATS systems with AI-powered precision.</p>
     </header>
 
-    <section class="floating-container">
-      <div class="floating-box">
-        <a href="https://openai.com" target="_blank">
-          <img src="https://global.discourse-cdn.com/openai1/original/3X/3/7/37b0465af49ce945753b8555462012147b0fb27a.svg" alt="OpenAI Logo" />
-          <strong>Made with OpenAI</strong>
-        </a>
-      </div>
-      <div class="floating-box">
-        <a href="https://github.com/raestrada/ResumeCraftr" target="_blank">
-          <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" alt="GitHub Logo" />
-          <strong>Explore on GitHub</strong>
-        </a>
-      </div>
-    </section>
+    <div class="openai-logo">
+      <a href="https://openai.com" target="_blank">
+        <img
+          src="https://global.discourse-cdn.com/openai1/original/3X/3/7/37b0465af49ce945753b8555462012147b0fb27a.svg"
+          alt="OpenAI Logo"
+        />
+        <p>Made with OpenAI</p>
+      </a>
+    </div>
+
+    <div class="github-logo">
+      <a
+        href="https://github.com/raestrada/ResumeCraftr"
+        target="_blank"
+        style="display: flex; align-items: center"
+      >
+        <img
+          src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png"
+          alt="GitHub Logo"
+          width="40"
+          height="40"
+        />
+        <p style="margin-left: 10px">View on GitHub</p>
+      </a>
+    </div>
 
     <section>
       <h2>Why ResumeCraftr?</h2>
@@ -200,7 +330,7 @@
         parsing, optimizing, and formatting CVs using OpenAI and LaTeX.
       </p>
       <h3>Installation</h3>
-      <div class="install-box">
+      <div class="coming-soon">
         <p>Install ResumeCraftr using pipx:</p>
         <code>pipx install git+https://github.com/raestrada/ResumeCraftr.git@v0.2.0</code>
       </div>
