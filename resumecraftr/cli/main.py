@@ -36,12 +36,10 @@ DEFAULT_CONFIG = {
     "template_name": "resume_template.tex",
 }
 
-
 @click.group()
 def cli():
     """ResumeCraftr CLI tool"""
     pass
-
 
 @click.command()
 @click.option(
@@ -51,11 +49,16 @@ def cli():
     "--gpt-model", default="gpt-4o", show_default=True, help="chatGPT Model"
 )
 def init(language, gpt_model):
-    """Initialize a new CV workspace with an optional language setting"""
+    """
+    Initialize a new CV workspace with an optional language setting.
+
+    :param language: Language of the CV (EN or ES)
+    :param gpt_model: chatGPT Model
+    """
     workspace_dir = "cv-workspace"
     os.makedirs(workspace_dir, exist_ok=True)
 
-    # Validar el idioma
+    # Validate language
     language = language.upper()
     if language not in ["EN", "ES"]:
         console.print(
@@ -63,7 +66,7 @@ def init(language, gpt_model):
         )
         return
 
-    # Configuración inicial
+    # Initial configuration
     config = DEFAULT_CONFIG.copy()
     config["primary_language"] = language
     config["chat_gpt"] = {
@@ -72,7 +75,7 @@ def init(language, gpt_model):
         "top_p": 1.0
     }
 
-    # Guardar configuración
+    # Save configuration
     if not os.path.exists(CONFIG_FILE):
         with open(CONFIG_FILE, "w", encoding="utf-8") as config_file:
             json.dump(config, config_file, indent=4)
@@ -110,7 +113,7 @@ def init(language, gpt_model):
             f"[bold green]CUSTOM initialized with empty:[/bold green] {CONFIG_FILE}"
         )
 
-    # Copiar plantilla LaTeX si no existe
+    # Copy LaTeX template if it doesn't exist
     if os.path.exists(TEMPLATE_SRC) and not os.path.exists(TEMPLATE_DEST):
         shutil.copy(TEMPLATE_SRC, TEMPLATE_DEST)
         console.print(f"[bold green]Template copied to:[/bold green] {TEMPLATE_DEST}")
