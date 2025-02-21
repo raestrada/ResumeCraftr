@@ -14,8 +14,8 @@ from resumecraftr.cli.agent import delete_all_resumecraftr_agents
 
 console = Console()
 
-CONFIG_FILE = "cv-workspace/resumecraftr.json"
-CUSTOM_FILE = "cv-workspace/custom.md"
+CONFIG_FILE = os.path.join("cv-workspace", "resumecraftr.json")
+CUSTOM_FILE = os.path.join("cv-workspace", "custom.md")
 
 try:
     with importlib.resources.path(
@@ -28,7 +28,7 @@ except ModuleNotFoundError:
     )
     TEMPLATE_SRC = None
 
-TEMPLATE_DEST = "cv-workspace/resume_template.tex"
+TEMPLATE_DEST = os.path.join("cv-workspace", "resume_template.tex")
 
 DEFAULT_CONFIG = {
     "primary_language": "EN",
@@ -70,9 +70,7 @@ def init(language, gpt_model):
     config = DEFAULT_CONFIG.copy()
     config["primary_language"] = language
     config["chat_gpt"] = {
-        "model": gpt_model,
-        "temperature": 0.7,
-        "top_p": 1.0
+        "model": gpt_model
     }
 
     # Save configuration
@@ -110,7 +108,7 @@ def init(language, gpt_model):
         with open(CUSTOM_FILE, "w", encoding="utf-8") as config_file:
             config_file.writelines("PUT HERE YOUR COMPLEMENTARY INFO AND INSTRUCTIONS")
         console.print(
-            f"[bold green]CUSTOM initialized with empty:[/bold green] {CONFIG_FILE}"
+            f"[bold green]CUSTOM initialized with empty:[/bold green] {CUSTOM_FILE}"
         )
 
     # Copy LaTeX template if it doesn't exist

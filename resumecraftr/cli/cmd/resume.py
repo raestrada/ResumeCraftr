@@ -9,8 +9,8 @@ from resumecraftr.cli.prompts.resume import RAW_PROMPTS
 from resumecraftr.cli.utils.json import clean_json_response, merge_json_files
 
 console = Console()
-CONFIG_FILE = "cv-workspace/resumecraftr.json"
-OUTPUT_FILE = "cv-workspace/{0}.optimized_sections.json"
+CONFIG_FILE = os.path.join("cv-workspace", "resumecraftr.json")
+OUTPUT_FILE = os.path.join("cv-workspace", "{0}.optimized_sections.json")
 
 
 def optimize_section(config, section_name, content, job_description):

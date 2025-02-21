@@ -38,7 +38,15 @@ def delete_all_resumecraftr_agents():
         console.print(f"[bold red]Error deleting agents: {e}[/bold red]")
 
 def get_vector_store_id_by_name(agent_name: str) -> str:
-    """Retrieve the vector store ID by the agent's name."""
+    """
+    Retrieve the vector store ID by the agent's name.
+
+    Args:
+        agent_name (str): The name of the agent.
+
+    Returns:
+        str: The ID of the vector store.
+    """
     vector_stores = client.beta.vector_stores.list()
     expected_name = f"{agent_name} Docs"
 
@@ -51,20 +59,36 @@ def get_vector_store_id_by_name(agent_name: str) -> str:
     )
     return None
 
-
 def load_supported_files(directory: str) -> list:
-    """Load all supported document files from the given directory and subdirectories."""
+    """
+    Load all supported document files from the given directory and subdirectories.
+
+    Args:
+        directory (str): The directory to search for files.
+
+    Returns:
+        list: A list of file paths.
+    """
     console.print(f"[bold blue]Loading documents from '{directory}'...[/bold blue]")
     files = []
     for ext in SUPPORTED_EXTENSIONS:
         files.extend(glob.glob(f"{directory}/**/*{ext}", recursive=True))
     return files
 
-
 def upload_files_to_vector_store(
     vector_store_id: str, progress: Progress = None, task=None
 ):
-    """Upload all supported files to the specified vector store."""
+    """
+    Upload all supported files to the specified vector store.
+
+    Args:
+        vector_store_id (str): The ID of the vector store.
+        progress (Progress, optional): The progress object for displaying progress.
+        task (optional): The task object for updating progress.
+
+    Returns:
+        None
+    """
     files = load_supported_files(CV_WORKSPACE)
 
     if not files:
@@ -88,9 +112,16 @@ def upload_files_to_vector_store(
         f"[bold green]Files uploaded successfully to vector store '{vector_store_id}'.[/bold green]"
     )
 
-
 def create_or_get_agent(name=None):
-    """Create or retrieve an assistant for document processing."""
+    """
+    Create or retrieve an assistant for document processing.
+
+    Args:
+        name (str, optional): The name of the agent. Defaults to None.
+
+    Returns:
+        assistant: The created or retrieved assistant.
+    """
     if not os.path.exists(CONFIG_FILE):
         console.print(
             "[bold red]Configuration file not found. Run 'resumecraftr init' first.[/bold red]"
@@ -135,11 +166,17 @@ def create_or_get_agent(name=None):
     )
     return assistant
 
-
 def execute_prompt(prompt: str, name=None) -> str:
     """
     Execute a given prompt using the AI agent, ensuring the vector database is refreshed.
     Provides real-time feedback to the user using Rich.
+
+    Args:
+        prompt (str): The prompt to send to the AI agent.
+        name (str, optional): The name of the agent. Defaults to None.
+
+    Returns:
+        str: The response from the AI agent.
     """
     assistant = create_or_get_agent(name)
     thread = client.beta.threads.create()

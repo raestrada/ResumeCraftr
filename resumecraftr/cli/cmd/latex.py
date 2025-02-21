@@ -13,8 +13,6 @@ CONFIG_FILE = "cv-workspace/resumecraftr.json"
 LATEX_TEMPLATE = "cv-workspace/resume_template.tex"
 CUSTOM_PROMPT = "cv-workspace/custom.md"
 
-
-
 def check_xelatex():
     """Check if xelatex is installed and provide installation instructions if not."""
     try:
@@ -27,7 +25,6 @@ def check_xelatex():
         return True
     except (FileNotFoundError, subprocess.CalledProcessError):
         return False
-
 
 def print_xelatex_installation_guide():
     """Prints installation instructions for XeLaTeX in Markdown format using rich."""
@@ -76,7 +73,6 @@ After installation, re-run:
 Once installed, retry running `resumecraftr generate-pdf`! ✅
 """
     console.print(Markdown(instructions))
-
 
 @click.command()
 def generate_pdf():
@@ -219,12 +215,12 @@ def generate_pdf():
             check=True,
         )
         console.print(
-            f"[bold green]PDF successfully generated: {output_pdf_file}[/bold green]"
+            f"[bold green]PDF successfully generated: {output_pdf_file}[bold green]"
         )
     except subprocess.CalledProcessError as e:
         console.print(f"[bold red]Error during LaTeX compilation: {e}[bold red]")
         console.print(
-            "[bold yellow]Attempting automatic LaTeX correction...[/bold yellow]"
+            "[bold yellow]Attempting automatic LaTeX correction...[bold yellow]"
         )
 
         # Use OpenAI to correct the LaTeX document
@@ -240,7 +236,7 @@ def generate_pdf():
                 f.write(corrected_latex.replace("```latex", "").replace("```", ""))
 
             console.print(
-                f"[bold cyan]Re-compiling corrected LaTeX file: {output_tex_file}[/bold cyan]"
+                f"[bold cyan]Re-compiling corrected LaTeX file: {output_tex_file}[bold cyan]"
             )
             try:
                 subprocess.run(
@@ -253,17 +249,16 @@ def generate_pdf():
                     check=True,
                 )
                 console.print(
-                    f"[bold green]PDF successfully generated after correction: {output_pdf_file}[/bold green]"
+                    f"[bold green]PDF successfully generated after correction: {output_pdf_file}[bold green]"
                 )
             except subprocess.CalledProcessError:
                 console.print(
-                    "[bold red]Final LaTeX compilation failed. Please review the LaTeX file manually.[/bold red]"
+                    "[bold red]Final LaTeX compilation failed. Please review the LaTeX file manually.[bold red]"
                 )
         else:
             console.print(
-                "[bold red]OpenAI could not correct the LaTeX document. Manual intervention required.[/bold red]"
+                "[bold red]OpenAI could not correct the LaTeX document. Manual intervention required.[bold red]"
             )
-
 
 if __name__ == "__main__":
     generate_pdf()

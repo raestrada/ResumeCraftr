@@ -5,9 +5,8 @@ from rich.console import Console
 from rich.prompt import Prompt
 
 console = Console()
-CONFIG_FILE = "cv-workspace/resumecraftr.json"
-JOBS_DIR = "cv-workspace/job_descriptions"
-
+CONFIG_FILE = os.path.join("cv-workspace", "resumecraftr.json")
+JOBS_DIR = os.path.join("cv-workspace", "job_descriptions")
 
 @click.command()
 @click.argument("job_name")
@@ -53,7 +52,6 @@ def add_job_description(job_name, content, file):
     console.print(
         f"[bold green]Updated {CONFIG_FILE} with job description reference.[/bold green]"
     )
-
 
 if __name__ == "__main__":
     add_job_description()

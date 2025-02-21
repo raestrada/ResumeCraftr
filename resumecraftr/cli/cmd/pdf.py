@@ -9,11 +9,18 @@ console = Console()
 CONFIG_FILE = "cv-workspace/resumecraftr.json"
 LATEX_TEMPLATE = "cv-workspace/resume_template.tex"
 
-
 @click.command()
 @click.argument("pdf_path", type=click.Path(exists=True))
 def extract_text(pdf_path):
-    """Extract text from a PDF and save it in the workspace directory, updating the config file."""
+    """
+    Extract text from a PDF and save it in the workspace directory, updating the config file.
+
+    Args:
+        pdf_path (str): The path to the PDF file.
+
+    Returns:
+        None
+    """
     workspace_dir = "cv-workspace"
     os.makedirs(workspace_dir, exist_ok=True)
 

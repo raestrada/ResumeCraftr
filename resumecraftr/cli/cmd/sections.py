@@ -12,7 +12,7 @@ from resumecraftr.cli.utils.json import clean_json_response
 
 
 console = Console()
-CONFIG_FILE = "cv-workspace/resumecraftr.json"
+CONFIG_FILE = os.path.join("cv-workspace", "resumecraftr.json")
 try:
     with importlib.resources.path(
         "resumecraftr.templates", "sections.json"
@@ -22,7 +22,7 @@ except ModuleNotFoundError:
     console.print(
         "[bold red]Error: Could not locate the sections file inside the installed package.[/bold red]"
     )
-OUTPUT_FILE = "cv-workspace/{0}.extracted_sections.json"
+OUTPUT_FILE = os.path.join("cv-workspace", "{0}.extracted_sections.json")
 
 
 def process_section(config, section_name, text_content, language):
@@ -129,7 +129,7 @@ def extract_sections():
         json.dump(extracted_data, f, indent=4, ensure_ascii=False)
 
     console.print(
-        f"[bold green]Extracted sections saved to: {OUTPUT_FILE}[/bold green]"
+        f"[bold green]Extracted sections saved to: {output_path}[/bold green]"
     )
 
 
