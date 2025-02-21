@@ -4,15 +4,23 @@ Welcome to [**ResumeCraftr**](https://resumecraftr.app), the open-source tool de
 
 ---
 
+## 🚀 What's New?
+
+### 🌟 Now with Windows Support! 🖥️
+
+ResumeCraftr now fully supports Windows, making it easier for more users to optimize their resumes across different platforms.
+
+---
+
 ## What's New? Discover AI Craftr 🌐
 
 **[AI Craftr](https://aicraftr.app)** is now available as a powerful suite for AI-assisted writing, featuring specialized tools like **ResumeCraftr** for resume optimization and **[PaperCraftr](https://papercraftr.app)** for academic writing. Each tool simplifies different types of content creation. Explore **PaperCraftr** for structuring research papers or stay tuned as we add more tools like **LegalCraftr** for legal documents.
 
 ---
 
-## Release Notes v0.2.0
+## Release Notes v0.3.0
 
-You can find the release notes for version `v0.2.0` [here](https://github.com/raestrada/ResumeCraftr/releases/tag/v0.2.0).
+You can find the release notes for version `v0.3.0` [here](https://github.com/raestrada/ResumeCraftr/releases/tag/v0.3.0).
 
 ## Step 1: Install ResumeCraftr
 
@@ -21,7 +29,7 @@ First, install **ResumeCraftr** using [pipx](https://pypa.github.io/pipx/), a to
 To install **ResumeCraftr**, run:
 
 ```bash
-pipx install git+https://github.com/raestrada/ResumeCraftr.git@v0.2.0
+pipx install git+https://github.com/raestrada/ResumeCraftr.git@v0.3.0
 ```
 
 ## Quick Examples

@@ -2,9 +2,12 @@ import os
 import glob
 import time
 import json
+from dotenv import load_dotenv
 from openai import OpenAI
 from rich.console import Console
 from rich.progress import Progress
+
+load_dotenv()
 
 console = Console()
 client = OpenAI()

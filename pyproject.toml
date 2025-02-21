@@ -15,6 +15,7 @@ pydantic = ">=1.9"
 pypdf = "^5.1.0"
 black = "^24.10.0"
 ipdb = "^0.13.13"
+python-dotenv = "^1.0.1"
 
 [tool.poetry.scripts]
 resumecraftr = "resumecraftr.cli.main:cli"

@@ -4,12 +4,20 @@ ResumeCraftr is an ATS-focused minimalist CV generator that leverages OpenAI and
 
 ---
 
+## 🚀 What's New?
+
+### 🌟 Now with Windows Support! 🖥️
+
+ResumeCraftr now fully supports Windows, making it easier for more users to optimize their resumes across different platforms.
+
+---
+
 ## Installation
 
 Ensure you have `pipx` installed, then install ResumeCraftr with:
 
 ```bash
-pipx install git+https://github.com/raestrada/ResumeCraftr.git@v0.2.0
+pipx install git+https://github.com/raestrada/ResumeCraftr.git@v0.3.0
 ```
 
 Additionally, make sure you have a LaTeX distribution installed, specifically one that includes `xelatex`.
