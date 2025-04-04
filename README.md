@@ -82,17 +82,13 @@ poetry run resumecraftr extract-sections
 poetry run resumecraftr extract-pdf
 ```
 
-### Generate a PDF directly from a text file without using OpenAI:
-
-```bash
-poetry run resumecraftr text-to-pdf [path/to/text_file.txt]
-```
-
 ### Generate a PDF directly from a LaTeX file (useful for manual corrections):
 
 ```bash
 poetry run resumecraftr tex-to-pdf [path/to/file.tex]
 ```
+
+### Add a job description for optimization:
 
 ```bash
 poetry run resumecraftr toPdf

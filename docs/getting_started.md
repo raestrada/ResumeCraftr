@@ -244,16 +244,6 @@ This command will:
 2. Let you choose which one to use
 3. Generate a PDF directly from the extracted sections without optimization
 
-#### Generate PDF from Text File
-
-You can also generate a PDF directly from a text file:
-
-```bash
-resumecraftr text-to-pdf [path/to/text_file.txt]
-```
-
-This is useful when you have a simple text file with your resume content and want to format it quickly.
-
 #### Generate PDF from LaTeX File
 
 If you've manually edited a LaTeX file or want to regenerate a PDF from an existing LaTeX file:
