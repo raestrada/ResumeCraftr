@@ -67,6 +67,7 @@ def extract_sections():
     with open(CONFIG_FILE, "r", encoding="utf-8") as f:
         config = json.load(f)
 
+    # Only create the agent when we're about to use OpenAI
     create_or_get_agent()
 
     extracted_files = config.get("extracted_files", [])

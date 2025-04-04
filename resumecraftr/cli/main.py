@@ -10,6 +10,7 @@ from resumecraftr.cli.cmd.sections import extract_sections
 from resumecraftr.cli.cmd.jobs_desc import add_job_description
 from resumecraftr.cli.cmd.resume import optimize_resume
 from resumecraftr.cli.cmd.latex import generate_pdf
+from resumecraftr.cli.cmd.create_cv import create_cv, add_section, show_cv
 from resumecraftr.cli.agent import delete_all_resumecraftr_agents
 
 console = Console()
@@ -155,6 +156,9 @@ cli.add_command(extract_sections, name="extract-sections")
 cli.add_command(add_job_description, name="add-job-description")
 cli.add_command(optimize_resume, name="optimize")
 cli.add_command(generate_pdf, name="toPdf")
+cli.add_command(create_cv, name="create-cv")
+cli.add_command(add_section, name="add-section")
+cli.add_command(show_cv, name="show-cv")
 
 if __name__ == "__main__":
     cli()

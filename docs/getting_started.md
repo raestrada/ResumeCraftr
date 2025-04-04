@@ -10,6 +10,10 @@ ResumeCraftr is an ATS-focused minimalist CV generator that leverages OpenAI and
 
 ResumeCraftr now fully supports Windows, making it easier for more users to optimize their resumes across different platforms.
 
+### 🌟 New Interactive CV Creation! 📝
+
+ResumeCraftr now allows you to create and manage CV sections interactively without needing to parse an existing CV. This makes it easier to build your resume from scratch or update specific sections.
+
 ---
 
 ## Installation
@@ -45,7 +49,7 @@ This will create the `cv-workspace` directory with the following files:
 
 ### Understanding `resumecraftr.json`
 
-Here’s an example of a `resumecraftr.json` configuration file:
+Here's an example of a `resumecraftr.json` configuration file:
 
 ```json
 {
@@ -82,6 +86,59 @@ The `custom.md` file is a powerful tool where you can add:
 - **Additional instructions** for ChatGPT to tailor the CV optimization further.
 
 Make sure to keep this file updated with relevant details to enhance your CV optimization process.
+
+---
+
+## Creating a CV from Scratch
+
+ResumeCraftr now allows you to create a CV from scratch without needing to parse an existing document. This is useful for building a new resume or updating specific sections.
+
+### Creating a New CV
+
+To create a new CV, run:
+
+```bash
+resumecraftr create-cv my_cv
+```
+
+This command creates a new CV with the name `my_cv` and initializes all sections with empty values.
+
+### Available Sections
+
+ResumeCraftr supports the following sections that you can add to your CV:
+
+1. **Contact Information** - Personal details like name, email, phone, location, and website
+2. **Professional Summary** - A brief overview of your professional background and career objectives
+3. **Work Experience** - Detailed information about your employment history
+4. **Education** - Academic background, degrees, and certifications
+5. **Skills** - Technical and soft skills relevant to your field
+6. **Projects** - Notable projects you've worked on
+7. **Publications** - Any articles, papers, or books you've authored
+8. **Awards & Achievements** - Recognition and accomplishments
+9. **Languages** - Language proficiencies
+10. **Volunteer Experience** - Community service and volunteer work
+11. **References** - Professional references (optional)
+12. **Custom Section** - Any additional section you'd like to include
+
+### Adding or Updating Sections
+
+To add or update a specific section in your CV, run:
+
+```bash
+resumecraftr add-section my_cv "Work Experience"
+```
+
+This command will guide you through the process of adding or updating the specified section. You can add multiple entries for sections like Work Experience, Projects, Education, etc.
+
+### Viewing Your CV
+
+To view the contents of your CV, run:
+
+```bash
+resumecraftr show-cv my_cv
+```
+
+This command displays all sections of your CV in a structured format.
 
 ---
 
@@ -127,6 +184,17 @@ resumecraftr optimize
 
 This step ensures that your resume highlights relevant skills and experience based on the job description. ResumeCraftr uses OpenAI to rewrite and structure the content to be ATS-friendly.
 
+### Language Optimization
+
+One of the key benefits of the optimize command is that it rewrites all content in the language you configured during initialization. This means:
+
+- **Grammar and Spelling**: The AI automatically corrects grammatical errors and spelling mistakes
+- **Language Consistency**: Ensures all content follows the same language style and conventions
+- **Professional Tone**: Adjusts the writing to maintain a professional tone appropriate for resumes
+- **Cultural Adaptation**: Adapts content to match the cultural expectations of the target language
+
+For example, if you configured ResumeCraftr with `--language ES` (Spanish), the optimize command will rewrite your resume in proper Spanish, correcting any language errors and ensuring it follows Spanish resume conventions.
+
 ---
 
 ## Generating a PDF Resume
@@ -160,4 +228,4 @@ This ensures that any new model preferences are applied to subsequent optimizati
 
 ---
 
-With these steps, you can extract, optimize, and generate a professionally formatted ATS-friendly resume with ResumeCraftr. 🚀
+With these steps, you can create, extract, optimize, and generate a professionally formatted ATS-friendly resume with ResumeCraftr. 🚀

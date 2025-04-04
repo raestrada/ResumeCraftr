@@ -10,6 +10,10 @@ Welcome to [**ResumeCraftr**](https://resumecraftr.app), the open-source tool de
 
 ResumeCraftr now fully supports Windows, making it easier for more users to optimize their resumes across different platforms.
 
+### 🌟 New Interactive CV Creation! 📝
+
+ResumeCraftr now allows you to create and manage CV sections interactively without needing to parse an existing CV. This makes it easier to build your resume from scratch or update specific sections.
+
 ---
 
 ## What's New? Discover AI Craftr 🌐
@@ -40,6 +44,24 @@ Here are a few ways to get started with **ResumeCraftr**:
 
 ```bash
 poetry run resumecraftr init --language EN
+```
+
+### Create a new CV from scratch:
+
+```bash
+poetry run resumecraftr create-cv my_cv
+```
+
+### Add or update a section in your CV:
+
+```bash
+poetry run resumecraftr add-section my_cv "Work Experience"
+```
+
+### View your CV:
+
+```bash
+poetry run resumecraftr show-cv my_cv
 ```
 
 ### Extract text from a resume:
@@ -82,6 +104,7 @@ For a complete guide, including more examples and instructions on how to fully l
 
 Applying for jobs requires a well-structured and ATS-optimized resume. **ResumeCraftr** helps you:
 
+- **Create resumes from scratch** with interactive section management.
 - **Extract resume content** from various document formats.
 - **Optimize resumes** to match job descriptions effectively.
 - **Generate professional LaTeX PDFs** with structured sections.
@@ -91,7 +114,7 @@ With ResumeCraftr, your resume gets the best chance of passing ATS filters and s
 
 ## Contributing
 
-We welcome contributions of all kinds! Whether you’re a developer, resume expert, or simply interested in improving the tool, you can help. Here’s how you can contribute:
+We welcome contributions of all kinds! Whether you're a developer, resume expert, or simply interested in improving the tool, you can help. Here's how you can contribute:
 
 1. **Fork the repository** and create your branch:
 

@@ -77,6 +77,7 @@ Once installed, retry running `resumecraftr generate-pdf`! ✅
 @click.command()
 def generate_pdf():
     """Generate a PDF resume using the optimized LaTeX template with OpenAI."""
+    # Only create the agent when we're about to use OpenAI
     create_or_get_agent("ResumeCraftr Agent PDF gen")
 
     if not check_xelatex():

@@ -4,17 +4,55 @@ import time
 import json
 from dotenv import load_dotenv
 from openai import OpenAI
+from openai import OpenAIError
 from rich.console import Console
 from rich.progress import Progress
+from rich.prompt import Prompt
 
 load_dotenv()
 
 console = Console()
-client = OpenAI()
-
 CV_WORKSPACE = "cv-workspace"
 SUPPORTED_EXTENSIONS = (".md", ".txt", ".doc", ".docx", ".pdf")
 CONFIG_FILE = "cv-workspace/resumecraftr.json"
+
+class OpenAIClientSingleton:
+    _instance = None
+    _client = None
+
+    @classmethod
+    def get_instance(cls):
+        if cls._instance is None:
+            cls._instance = cls()
+        return cls._instance
+
+    def get_client(self):
+        if self._client is None:
+            try:
+                self._client = OpenAI()
+                # Test the client with a simple API call
+                self._client.models.list()
+            except OpenAIError as e:
+                if "api_key" in str(e).lower():
+                    console.print("[bold red]Error: OpenAI API key not found or invalid.[/bold red]")
+                    api_key = Prompt.ask("[bold yellow]Please enter your OpenAI API key[/bold yellow]")
+                    os.environ["OPENAI_API_KEY"] = api_key
+                    # Try again with the new key
+                    try:
+                        self._client = OpenAI()
+                        self._client.models.list()
+                        console.print("[bold green]Successfully connected to OpenAI with the new API key![/bold green]")
+                    except OpenAIError as retry_error:
+                        console.print(f"[bold red]Error: Still unable to connect to OpenAI: {str(retry_error)}[/bold red]")
+                        raise
+                else:
+                    console.print(f"[bold red]Error connecting to OpenAI: {str(e)}[/bold red]")
+                    raise
+        return self._client
+
+def get_openai_client():
+    """Get an initialized OpenAI client using the Singleton pattern."""
+    return OpenAIClientSingleton.get_instance().get_client()
 
 def delete_all_resumecraftr_agents():
     """
@@ -24,6 +62,7 @@ def delete_all_resumecraftr_agents():
         None
     """
     try:
+        client = get_openai_client()
         console.print("[bold cyan]Fetching agents to delete those starting with 'ResumeCraftr'...[/bold cyan]")
         agents = client.beta.assistants.list()
         matching_agents = [agent for agent in agents.data if agent.name.startswith("ResumeCraftr")]
@@ -50,6 +89,7 @@ def get_vector_store_id_by_name(agent_name: str) -> str:
     Returns:
         str: The ID of the vector store.
     """
+    client = get_openai_client()
     vector_stores = client.beta.vector_stores.list()
     expected_name = f"{agent_name} Docs"
 
@@ -92,6 +132,7 @@ def upload_files_to_vector_store(
     Returns:
         None
     """
+    client = get_openai_client()
     files = load_supported_files(CV_WORKSPACE)
 
     if not files:
@@ -135,6 +176,9 @@ def create_or_get_agent(name=None):
         config = json.load(f)
 
     agent_name = "ResumeCraftr Agent" if name is None else name
+    
+    # Only initialize OpenAI client when needed
+    client = get_openai_client()
 
     assistants = client.beta.assistants.list()
     for assistant in assistants.data:
@@ -181,6 +225,8 @@ def execute_prompt(prompt: str, name=None) -> str:
     Returns:
         str: The response from the AI agent.
     """
+    # Only initialize OpenAI client when needed
+    client = get_openai_client()
     assistant = create_or_get_agent(name)
     thread = client.beta.threads.create()
 

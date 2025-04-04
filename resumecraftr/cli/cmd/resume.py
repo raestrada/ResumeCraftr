@@ -52,6 +52,7 @@ def optimize_resume():
         )
         return
 
+    # Only create the agent when we're about to use OpenAI
     create_or_get_agent()
 
     with open(CONFIG_FILE, "r", encoding="utf-8") as f:
@@ -153,7 +154,6 @@ def optimize_resume():
         json.dump(optimized_resume, f, indent=4, ensure_ascii=False)
 
     merge_json_files(output_path, sections_path, output_path)
-
     console.print(f"[bold green]Optimized resume saved to: {output_path}[/bold green]")
 
 
