@@ -204,62 +204,58 @@ def generate_pdf():
 
     console.print(f"[bold cyan]Compiling LaTeX file: {output_tex_file}[/bold cyan]")
 
+    # Get the maximum number of correction attempts from config
+    max_corrections = config.get("max_latex_corrections", 5)
+    correction_attempts = 0
+    compilation_successful = False
+
     # Compile LaTeX to PDF
-    try:
-        subprocess.run(
-            [
-                "xelatex",
-                "-interaction=nonstopmode",
-                "-output-directory=cv-workspace",
-                output_tex_file,
-            ],
-            check=True,
-        )
-        console.print(
-            f"[bold green]PDF successfully generated: {output_pdf_file}[bold green]"
-        )
-    except subprocess.CalledProcessError as e:
-        console.print(f"[bold red]Error during LaTeX compilation: {e}[bold red]")
-        console.print(
-            "[bold yellow]Attempting automatic LaTeX correction...[bold yellow]"
-        )
-
-        # Use OpenAI to correct the LaTeX document
-        correction_prompt = LATEX_CORRECTION.format(
-            latex_code=latex_content, error_message=str(e)
-        ).replace("{{","{").replace("}}","}")
-        corrected_latex = execute_prompt(
-            correction_prompt, "ResumeCraftr Agent PDF gen"
-        )
-
-        if corrected_latex.strip():
-            with open(output_tex_file, "w", encoding="utf-8") as f:
-                f.write(corrected_latex.replace("```latex", "").replace("```", ""))
-
-            console.print(
-                f"[bold cyan]Re-compiling corrected LaTeX file: {output_tex_file}[bold cyan]"
+    while not compilation_successful and correction_attempts <= max_corrections:
+        try:
+            subprocess.run(
+                [
+                    "xelatex",
+                    "-interaction=nonstopmode",
+                    "-output-directory=cv-workspace",
+                    output_tex_file,
+                ],
+                check=True,
             )
-            try:
-                subprocess.run(
-                    [
-                        "xelatex",
-                        "-interaction=nonstopmode",
-                        "-output-directory=cv-workspace",
-                        output_tex_file,
-                    ],
-                    check=True,
-                )
-                console.print(
-                    f"[bold green]PDF successfully generated after correction: {output_pdf_file}[bold green]"
-                )
-            except subprocess.CalledProcessError:
-                console.print(
-                    "[bold red]Final LaTeX compilation failed. Please review the LaTeX file manually.[bold red]"
-                )
-        else:
             console.print(
-                "[bold red]OpenAI could not correct the LaTeX document. Manual intervention required.[bold red]"
+                f"[bold green]PDF successfully generated: {output_pdf_file}[/bold green]"
             )
+            compilation_successful = True
+        except subprocess.CalledProcessError as e:
+            if correction_attempts < max_corrections:
+                console.print(f"[bold red]Error during LaTeX compilation (attempt {correction_attempts + 1}/{max_corrections}): {e}[/bold red]")
+                console.print(
+                    f"[bold yellow]Attempting automatic LaTeX correction (attempt {correction_attempts + 1}/{max_corrections})...[/bold yellow]"
+                )
+
+                # Use OpenAI to correct the LaTeX document
+                correction_prompt = LATEX_CORRECTION.format(
+                    latex_code=latex_content, error_message=str(e)
+                ).replace("{{","{").replace("}}","}")
+                corrected_latex = execute_prompt(
+                    correction_prompt, "ResumeCraftr Agent PDF gen"
+                )
+
+                if corrected_latex.strip():
+                    with open(output_tex_file, "w", encoding="utf-8") as f:
+                        f.write(corrected_latex.replace("```latex", "").replace("```", ""))
+                    
+                    latex_content = corrected_latex
+                    correction_attempts += 1
+                else:
+                    console.print(
+                        "[bold red]OpenAI could not correct the LaTeX document. Manual intervention required.[/bold red]"
+                    )
+                    break
+            else:
+                console.print(
+                    f"[bold red]Maximum correction attempts ({max_corrections}) reached. Please review the LaTeX file manually.[/bold red]"
+                )
+                break
 
 if __name__ == "__main__":
     generate_pdf()

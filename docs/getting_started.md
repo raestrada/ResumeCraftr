@@ -56,6 +56,7 @@ Here's an example of a `resumecraftr.json` configuration file:
     "primary_language": "ES",
     "output_format": "pdf",
     "template_name": "resume_template.tex",
+    "max_latex_corrections": 5,
     "chat_gpt": {
         "model": "gpt-4o-mini",
         "temperature": 0.7,
@@ -73,6 +74,7 @@ Here's an example of a `resumecraftr.json` configuration file:
 - **`primary_language`**: The language of the CV and job descriptions (e.g., `EN`, `ES`).
 - **`output_format`**: Output format, typically `pdf`.
 - **`template_name`**: Name of the LaTeX template used for PDF generation.
+- **`max_latex_corrections`**: Maximum number of attempts to correct LaTeX errors during PDF generation (default: 5).
 - **`chat_gpt`**: OpenAI settings such as the model, temperature, and top_p.
 - **`extracted_files`**: List of extracted text files from your CVs.
 - **`job_descriptions`**: List of job description files used for optimization.

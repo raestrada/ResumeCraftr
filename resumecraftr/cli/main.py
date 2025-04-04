@@ -37,6 +37,7 @@ DEFAULT_CONFIG = {
     "primary_language": "EN",
     "output_format": "pdf",
     "template_name": "resume_template.tex",
+    "max_latex_corrections": 5,
 }
 
 @click.group()
