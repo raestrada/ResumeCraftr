@@ -227,6 +227,51 @@ ResumeCraftr uses OpenAI to:
 
 The resulting PDF will be saved in `cv-workspace/`.
 
+### Alternative PDF Generation Methods
+
+ResumeCraftr provides several alternative methods for generating PDFs without using OpenAI:
+
+#### Generate PDF from Extracted Sections
+
+If you've extracted sections from a PDF but haven't optimized them yet, you can generate a PDF directly:
+
+```bash
+resumecraftr extract-pdf
+```
+
+This command will:
+1. List all `.extracted_sections.json` files in your workspace
+2. Let you choose which one to use
+3. Generate a PDF directly from the extracted sections without optimization
+
+#### Generate PDF from Text File
+
+You can also generate a PDF directly from a text file:
+
+```bash
+resumecraftr text-to-pdf [path/to/text_file.txt]
+```
+
+This is useful when you have a simple text file with your resume content and want to format it quickly.
+
+#### Generate PDF from LaTeX File
+
+If you've manually edited a LaTeX file or want to regenerate a PDF from an existing LaTeX file:
+
+```bash
+resumecraftr tex-to-pdf [path/to/file.tex]
+```
+
+This command will:
+1. List all `.tex` files in your workspace (excluding the template)
+2. Let you choose which one to use
+3. Compile the selected LaTeX file to generate a PDF
+
+This is particularly useful when:
+- The automatic LaTeX generation fails
+- You want to make manual corrections to the LaTeX file
+- You want to experiment with different LaTeX formatting
+
 ---
 
 ## Changing Models or Recreating Agents
