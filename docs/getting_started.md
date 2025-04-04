@@ -21,7 +21,7 @@ ResumeCraftr now allows you to create and manage CV sections interactively witho
 Ensure you have `pipx` installed, then install ResumeCraftr with:
 
 ```bash
-pipx install git+https://github.com/raestrada/ResumeCraftr.git@v0.3.0
+pipx install git+https://github.com/raestrada/ResumeCraftr.git@v0.4.0
 ```
 
 Additionally, make sure you have a LaTeX distribution installed, specifically one that includes `xelatex`.

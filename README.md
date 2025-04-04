@@ -22,9 +22,9 @@ ResumeCraftr now allows you to create and manage CV sections interactively witho
 
 ---
 
-## Release Notes v0.3.0
+## Release Notes v0.4.0
 
-You can find the release notes for version `v0.3.0` [here](https://github.com/raestrada/ResumeCraftr/releases/tag/v0.3.0).
+You can find the release notes for version `v0.4.0` [here](https://github.com/raestrada/ResumeCraftr/releases/tag/v0.4.0).
 
 ## Step 1: Install ResumeCraftr
 
@@ -33,7 +33,7 @@ First, install **ResumeCraftr** using [pipx](https://pypa.github.io/pipx/), a to
 To install **ResumeCraftr**, run:
 
 ```bash
-pipx install git+https://github.com/raestrada/ResumeCraftr.git@v0.3.0
+pipx install git+https://github.com/raestrada/ResumeCraftr.git@v0.4.0
 ```
 
 ## Quick Examples
