@@ -162,7 +162,23 @@ To classify the extracted resume text into structured sections such as contact d
 resumecraftr extract-sections
 ```
 
-This command creates an `.optimized_sections.json` file, which contains a structured version of your CV, making it easier to optimize.
+This command creates an `.extracted_sections.json` file, which contains a structured version of your CV, making it easier to optimize.
+
+### Generating a PDF from Extracted Sections
+
+If you want to generate a PDF directly from the extracted sections without going through the optimization process, use:
+
+```bash
+resumecraftr extract-pdf
+```
+
+This command will:
+1. Find all `.extracted_sections.json` files in your workspace
+2. Let you choose which one to use if multiple files exist
+3. Generate a LaTeX file and compile it to PDF
+4. Save the resulting PDF in your workspace
+
+This is useful when you want to see how your CV looks after extraction but before optimization, or when you're satisfied with the extracted content and don't need to optimize it for a specific job.
 
 ---
 

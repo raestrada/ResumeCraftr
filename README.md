@@ -76,6 +76,12 @@ poetry run resumecraftr extract /Users/username/Documents/Personal/Resume.pdf
 poetry run resumecraftr extract-sections
 ```
 
+### Generate a PDF directly from extracted sections:
+
+```bash
+poetry run resumecraftr extract-pdf
+```
+
 ### Add a job description for optimization:
 
 ```bash
