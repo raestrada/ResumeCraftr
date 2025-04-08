@@ -9,13 +9,13 @@ NC='\033[0m' # No Color
 
 # Verificar si se pasó --use-poetry como argumento
 if [[ "$*" == *"--use-poetry"* ]]; then
-    COMMAND="poetry run papercraftr"
+    COMMAND="poetry run resumecraftr"
 else
-    COMMAND="papercraftr"
+    COMMAND="resumecraftr"
 fi
 
 # Archivo de checkpoint
-CHECKPOINT_FILE=".papercraftr_checkpoint"
+CHECKPOINT_FILE=".resumecraftr_checkpoint"
 
 # Crear archivo de checkpoint si no existe
 if [ ! -f "$CHECKPOINT_FILE" ]; then
@@ -52,81 +52,47 @@ run_command() {
     fi
 }
 
-# Función para generar behavior.txt si no existe
-generate_behavior() {
-    if [ -f "behavior.txt" ] && check_command "generate_behavior"; then
-        echo -e "${YELLOW}behavior.txt already exists, skipping generation${NC}"
+# Función para generar custom.md si no existe
+generate_custom() {
+    if [ -f "cv-workspace/custom.md" ] && check_command "generate_custom"; then
+        echo -e "${YELLOW}custom.md already exists, skipping generation${NC}"
         return 0
     fi
 
-    cat > behavior.txt << 'EOL'
-You are an expert academic writing assistant with extensive experience in computer science, machine learning, and medical imaging research. Your role is to help researchers write clear, rigorous, and impactful academic papers.
+    # Crear directorio cv-workspace si no existe
+    mkdir -p cv-workspace
 
-WRITING STYLE:
-- Maintain formal academic tone throughout
-- Use clear, precise, and technical language
-- Avoid colloquialisms and informal expressions
-- Write in active voice when describing your contributions
-- Use passive voice for established methods or previous work
-- Be concise but thorough
-- Use proper academic terminology consistently
+    cat > cv-workspace/custom.md << 'EOL'
+# Custom Instructions for ResumeCraftr
 
-CONTENT GUIDELINES:
-1. Introduction
-- Start with broad context, narrow to specific problem
-- Clearly state research gap and motivation
-- Present research questions/objectives
-- Outline contributions and paper structure
+## Resume Style Guidelines
+- Use action verbs to begin bullet points
+- Quantify achievements with specific numbers and percentages
+- Keep bullet points concise (1-2 lines maximum)
+- Use consistent formatting throughout
+- Highlight most relevant skills for each job application
 
-2. Literature Review
-- Organize by themes or chronologically
-- Critically analyze existing work
-- Highlight gaps and limitations
-- Connect previous work to your research
+## Content Focus
+- Emphasize technical skills relevant to the target position
+- Include specific project outcomes and business impact
+- Highlight leadership and collaboration experiences
+- Demonstrate problem-solving abilities with concrete examples
 
-3. Methodology
-- Provide sufficient detail for replication
-- Justify methodological choices
-- Include implementation details
-- Describe validation approaches
+## Language Preferences
+- Use professional, industry-standard terminology
+- Avoid jargon unless specifically relevant to the field
+- Maintain a confident but not arrogant tone
+- Use present tense for current roles, past tense for previous positions
 
-4. Results
-- Present findings objectively
-- Use appropriate statistical measures
-- Include relevant visualizations
-- Structure from most to least significant
-
-5. Discussion
-- Interpret results in context
-- Compare with existing literature
-- Address limitations honestly
-- Discuss implications
-
-6. Citations
-- Follow specified citation style consistently
-- Cite primary sources when possible
-- Include recent and seminal works
-- Avoid excessive self-citation
-
-TECHNICAL WRITING:
-- Define abbreviations at first use
-- Use consistent notation throughout
-- Include units for all measurements
-- Format equations properly
-- Number figures and tables sequentially
-- Provide clear figure captions
-
-QUALITY STANDARDS:
-- Ensure logical flow between sections
-- Maintain consistent terminology
-- Support claims with evidence
-- Address potential criticisms
-- Follow ethical guidelines
-- Check for completeness
+## Formatting Instructions
+- Use bold for section headings
+- Use italics for company names and job titles
+- Use bullet points for achievements and responsibilities
+- Maintain consistent spacing between sections
 EOL
 
-    mark_command "generate_behavior"
-    echo -e "${GREEN}behavior.txt generated successfully${NC}"
+    mark_command "generate_custom"
+    echo -e "${GREEN}custom.md generated successfully${NC}"
 }
 
 # Verificar si se debe continuar desde un checkpoint
@@ -136,46 +102,38 @@ else
     echo -e "${YELLOW}Starting new execution...${NC}"
 fi
 
-# Generar behavior.txt
-generate_behavior
+# Generar custom.md
+generate_custom
 
 # Inicializar el proyecto
-run_command 'init "Deep Learning in Medical Imaging" --openai-model "gpt-4o-mini" --primary-language "en" --author "Rodrigo Estrada" --keywords "deep learning, medical imaging, CNN, diagnostic systems" --behavior "behavior.txt"' || exit 1
+run_command 'setup --language "EN" --gpt-model "gpt-4o"' || exit 1
 
-cd "Deep Learning in Medical Imaging"
+# 1. Crear un nuevo CV
+run_command 'new-cv "Software Engineer Resume"' || exit 1
 
-# 1. Crear outline del paper
-run_command 'outline outline-sections "Create a detailed outline for a comprehensive review paper on deep learning in medical imaging."' || exit 1
+# 2. Añadir secciones al CV
+run_command 'add-section "Professional Summary" "Experienced software engineer with expertise in full-stack development, cloud architecture, and agile methodologies. Proven track record of delivering scalable solutions and leading development teams."' || exit 1
+run_command 'add-section "Experience" "Senior Software Engineer at TechCorp (2020-Present)\n- Led development of microservices architecture reducing system latency by 40%\n- Managed a team of 5 developers implementing CI/CD pipeline\n- Implemented automated testing increasing code coverage to 95%"' || exit 1
+run_command 'add-section "Education" "Master of Science in Computer Science, Stanford University (2018)\nBachelor of Science in Software Engineering, MIT (2016)"' || exit 1
+run_command 'add-section "Skills" "Programming: Python, JavaScript, Java, C#\nFrameworks: React, Node.js, Django, Spring Boot\nCloud: AWS, Azure, GCP\nDevOps: Docker, Kubernetes, Jenkins\nDatabases: PostgreSQL, MongoDB, Redis"' || exit 1
+run_command 'add-section "Projects" "E-commerce Platform (2021)\n- Developed full-stack application using React and Node.js\n- Implemented payment processing with Stripe API\n- Deployed on AWS with auto-scaling configuration\n\nMobile App (2020)\n- Created cross-platform app using React Native\n- Integrated with RESTful APIs for real-time data\n- Published on both App Store and Google Play"' || exit 1
 
-# 2. Organizar literatura
-run_command 'organize-lit lit-summary "Review and summarize current literature on deep learning applications in medical imaging, focusing on diagnostic systems."' || exit 1
+# 3. Importar CV desde archivo
+run_command 'import-cv cv-workspace/software_engineer_resume.pdf' || exit 1
 
-# 3. Generar secciones
-run_command 'generate introduction "Write an introduction that establishes the importance of deep learning in medical imaging."' || exit 1
-run_command 'generate methodology "Detail the systematic review methodology used in this paper."' || exit 1
+# 4. Parsear CV importado
+run_command 'parse-cv cv-workspace/software_engineer_resume.txt' || exit 1
 
-# Custom sections between methodology and results
-run_command 'generate custom --order 1 "Theoretical Framework" "Develop a theoretical framework that explains the connection between deep learning architectures and medical image analysis."' || exit 1
-run_command 'generate custom --order 2 "Data Collection" "Describe the data collection process, including sources, criteria for inclusion/exclusion, and data extraction methods."' || exit 1
+# 5. Añadir descripción de trabajo
+run_command 'add-job "Senior Full-Stack Developer Position at TechInnovate" "We are looking for a Senior Full-Stack Developer to join our growing team. The ideal candidate will have 5+ years of experience in web development, strong knowledge of JavaScript frameworks, and experience with cloud platforms. Responsibilities include developing and maintaining web applications, collaborating with cross-functional teams, and mentoring junior developers."' || exit 1
 
-run_command 'generate results "Present the findings on deep learning applications in medical imaging."' || exit 1
-run_command 'generate discussion "Discuss the implications, limitations, and future directions of deep learning in medical imaging."' || exit 1
-run_command 'generate conclusion "Summarize key findings and contributions to the field."' || exit 1
+# 6. Adaptar CV a la descripción del trabajo
+run_command 'tailor-cv cv-workspace/software_engineer_resume.optimized_sections.json' || exit 1
 
-# 4. Gestionar referencias
-run_command 'references add "LeCun, Y., Bengio, Y., & Hinton, G. (2015). Deep learning. Nature, 521(7553), 436-444."' || exit 1
-run_command 'references add "Litjens, G., et al. (2017). A survey on deep learning in medical image analysis. Medical Image Analysis, 42, 60-88."' || exit 1
-run_command 'references format "IEEE"' || exit 1
-run_command 'references check "Verify all citations are properly formatted and consistently used throughout the paper."' || exit 1
+# 7. Exportar CV a PDF
+run_command 'export-pdf' || exit 1
 
-# 5. Iterar y mejorar
-run_command 'iterate reinforce-ideas "Strengthen the core arguments and technical depth throughout the paper."' || exit 1
-run_command 'iterate improve-clarity "Enhance clarity and readability while maintaining academic rigor."' || exit 1
+# 8. Exportar CV a PDF en español
+run_command 'export-pdf --translate ES' || exit 1
 
-# 6. Publicar
-run_command 'publish pdf' || exit 1
-
-# 7. Interactuar con el asistente para mejoras finales
-run_command 'chat "Please review the paper and suggest any final improvements."' || exit 1
-
-echo -e "${GREEN}Example usage for PaperCraftr completed successfully${NC}" 
+echo -e "${GREEN}Example usage for ResumeCraftr completed successfully${NC}" 

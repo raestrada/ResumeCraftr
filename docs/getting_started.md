@@ -52,14 +52,17 @@ Additionally, make sure you have Pandoc installed:
 For Debian/Ubuntu:
    ```
    sudo apt update && sudo apt install pandoc
+   sudo apt-get install texlive-latex-base texlive-latex-extra texlive-latex-recommended texlive-publishers texlive-science texlive-bibtex-extra biber
    ```
 For Arch Linux:
    ```
    sudo pacman -S pandoc
+   sudo pacman -S texlive-most
    ```
 For Fedora:
    ```
    sudo dnf install pandoc
+   sudo dnf install texlive-scheme-full
    ```
 
 ---
@@ -255,3 +258,20 @@ The command will:
 4. Save the resulting PDF in your workspace
 
 The PDF will be formatted according to the template in `resume_template.md`, which you can customize to match your preferred style.
+
+### 5. Exportar a PDF
+```bash
+# Exportar a PDF (requiere Pandoc y LaTeX)
+resumecraftr export-pdf
+
+# Exportar a PDF en español
+resumecraftr export-pdf --translate ES
+
+# Exportar a PDF usando un archivo Markdown existente (sin llamar a OpenAI)
+resumecraftr export-pdf --skip-md-gen
+```
+
+La opción `--skip-md-gen` es especialmente útil cuando:
+- Necesitas depurar problemas con Pandoc/LaTeX sin tener que esperar a la generación del Markdown
+- Quieres hacer ajustes manuales al archivo Markdown y volver a generar el PDF rápidamente
+- Ya tienes un archivo Markdown que quieres usar directamente

@@ -91,7 +91,14 @@ poetry run resumecraftr tailor-cv
 ### Export your CV to PDF:
 
 ```bash
-poetry run resumecraftr export-pdf
+# Exportar a PDF (requiere Pandoc y LaTeX)
+resumecraftr export-pdf
+
+# Exportar a PDF en español
+resumecraftr export-pdf --translate ES
+
+# Exportar a PDF usando un archivo Markdown existente (sin llamar a OpenAI)
+resumecraftr export-pdf --skip-md-gen
 ```
 
 ## Full Guide
