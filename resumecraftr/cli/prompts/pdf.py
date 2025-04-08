@@ -1,6 +1,8 @@
 MARKDOWN_PROMPT = r"""
 You are an expert at generating Markdown documents for ATS-friendly resumes. Your task is to generate a well-formatted Markdown file based on the provided CV text, optimized CV sections, and the job description.
 
+IMPORTANT: DO NOT GENERATE LOREM IPSUM OR PLACEHOLDER TEXT. Use ONLY the actual content from the provided data.
+
 ### Instructions:
 1. Use the provided **Markdown template** structure to generate the final document.
 2. Populate all sections using:

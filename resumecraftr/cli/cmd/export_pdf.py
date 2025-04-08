@@ -3,6 +3,7 @@ import os
 import json
 import subprocess
 import shutil
+import time
 from rich.console import Console
 from rich.prompt import Prompt
 from rich.markdown import Markdown
@@ -237,25 +238,88 @@ def export_pdf(translate, skip_md_gen):
     language = translate if translate else config.get("primary_language", "EN")
     console.print(f"[bold blue]Generating resume in language: {language}[/bold blue]")
 
-    # If skip_md_gen is True, we'll use an existing Markdown file
     if skip_md_gen:
-        # Find existing Markdown files in the workspace
-        md_files = [f for f in os.listdir("cv-workspace") if f.endswith(".md")]
+        # Find existing Markdown files in the workspace that start with "openai-response"
+        md_files = [f for f in os.listdir("cv-workspace") if f.endswith(".md") and f.startswith("openai-response")]
         
         if not md_files:
-            console.print("[bold red]No Markdown files found in cv-workspace directory.[/bold red]")
+            console.print("[bold red]No OpenAI response Markdown files found in cv-workspace directory.[/bold red]")
             return
             
         if len(md_files) > 1:
             # Let user choose which Markdown file to use
             md_file = Prompt.ask(
-                "Multiple Markdown files detected. Choose one", choices=md_files
+                "Multiple OpenAI response files detected. Choose one", choices=md_files
             )
         else:
             md_file = md_files[0]
             
         output_md_file = os.path.join("cv-workspace", md_file)
-        console.print(f"[bold blue]Using existing Markdown file: {md_file}[/bold blue]")
+        console.print(f"[bold blue]Using OpenAI response file: {md_file}[/bold blue]")
+        
+        # Add language suffix to PDF filename
+        output_pdf_file = output_md_file.replace(".md", f"_{language.lower()}.pdf")
+
+        console.print(f"[bold cyan]Converting Markdown to PDF: {output_md_file}[/bold cyan]")
+
+        # Convert Markdown to PDF using Pandoc
+        try:
+            pandoc_cmd = [
+                "pandoc",
+                output_md_file,
+                "-o", output_pdf_file,
+                "--pdf-engine=xelatex",
+                "--template=eisvogel",
+                "--listings",
+                "--toc",
+                "--toc-depth=2",
+                "--number-sections",
+                "--highlight-style=tango",
+                "--variable", "colorlinks:true",
+                "--variable", "linkcolor:blue",
+                "--variable", "urlcolor:blue",
+                "--variable", "toccolor:blue",
+            ]
+            
+            result = subprocess.run(pandoc_cmd, check=False, capture_output=True, text=True)
+            
+            if result.returncode != 0:
+                console.print(f"[bold red]Error during PDF export:[/bold red]")
+                console.print(result.stderr)
+                
+                # Verificar si el error está relacionado con paquetes LaTeX faltantes
+                if "biblatex.sty not found" in result.stderr or "Package biblatex Error" in result.stderr:
+                    console.print("[bold red]Missing LaTeX packages detected.[/bold red]")
+                    console.print("[bold yellow]Please install the required LaTeX packages:[/bold yellow]")
+                    console.print("""
+For Ubuntu/Debian:
+```
+sudo apt-get update
+sudo apt-get install texlive-latex-base texlive-latex-extra texlive-latex-recommended texlive-publishers texlive-science texlive-bibtex-extra biber
+```
+
+For Arch Linux:
+```
+sudo pacman -S texlive-most
+```
+
+For Fedora:
+```
+sudo dnf install texlive-scheme-full
+```
+""")
+                else:
+                    console.print("[bold yellow]You can edit the Markdown file manually and try again.[/bold yellow]")
+                return
+            
+            console.print(
+                f"[bold green]PDF successfully exported: {output_pdf_file}[/bold green]"
+            )
+        except Exception as e:
+            console.print(f"[bold red]Error during PDF export: {e}[/bold red]")
+            console.print(
+                "[bold yellow]You can edit the Markdown file manually and try again.[/bold yellow]"
+            )
     else:
         # Normal flow - generate Markdown with OpenAI
         with open(CUSTOM_PROMPT, "r", encoding="utf-8") as f:
@@ -300,6 +364,14 @@ def export_pdf(translate, skip_md_gen):
         with open(MD_TEMPLATE, "r", encoding="utf-8") as f:
             md_template = f.read()
 
+        # Load consolidated Markdown if it exists
+        consolidated_md = None
+        consolidated_md_path = os.path.join("cv-workspace", "Rodrigo Estrada CV EN.md")
+        if os.path.exists(consolidated_md_path):
+            with open(consolidated_md_path, "r", encoding="utf-8") as f:
+                consolidated_md = f.read()
+            console.print(f"[bold green]Found consolidated Markdown file: {consolidated_md_path}[/bold green]")
+
         # Load extracted CV text
         original_cv_text = ""
         for txt_file in config.get("extracted_files", []):
@@ -335,19 +407,40 @@ def export_pdf(translate, skip_md_gen):
         )
 
         # Generate the prompt
-        prompt = (
-            MARKDOWN_PROMPT.format(
-                md_template=md_template,
-                optimized_sections=optimized_sections_text,
-                job_description=job_description,
-                language=language,
-                custom=custom_promt
-            )
-            .replace("{{", "{")
-            .replace("}}", "}")
-        )
+        prompt = f"""
+You are an expert at generating Markdown documents for ATS-friendly resumes. Your task is to generate a well-formatted Markdown file based on the provided CV text, optimized CV sections, and the job description.
+
+IMPORTANT: DO NOT GENERATE LOREM IPSUM OR PLACEHOLDER TEXT. Use ONLY the actual content from the provided data.
+
+### Instructions:
+1. Use the provided **Markdown template** structure to generate the final document.
+2. Use the **consolidated Markdown** as your primary source of content. This is the most up-to-date version of the CV.
+3. Use the **optimized CV sections** and **job description** to enhance and tailor the content, but maintain the structure and information from the consolidated Markdown.
+4. Ensure all sections from the consolidated Markdown are preserved.
+5. Do not introduce new information that doesn't exist in the provided data.
+6. Generate the resume in {language}.
+
+### Consolidated Markdown (USE THIS AS PRIMARY SOURCE):
+```markdown
+{consolidated_md if consolidated_md else "No consolidated Markdown available"}
+```
+
+### Optimized CV Sections (USE TO ENHANCE CONTENT):
+```json
+{optimized_sections_text}
+```
+
+### Job Description (USE FOR TAILORING):
+```
+{job_description}
+```
+
+### Output:
+Provide ONLY the final Markdown file content in {language}, properly formatted and ready for conversion to PDF using Pandoc. Do not include any explanations or code blocks.
+"""
 
         # Generate Markdown with OpenAI
+        console.print("[bold cyan]Generating Markdown content with OpenAI...[/bold cyan]")
         markdown_content = execute_prompt(prompt, "ResumeCraftr Agent PDF gen")
 
         if not markdown_content.strip():
@@ -356,49 +449,63 @@ def export_pdf(translate, skip_md_gen):
             )
             return
 
+        # Save the OpenAI response to a file with timestamp
+        timestamp = time.strftime("%Y%m%d-%H%M%S")
+        openai_response_file = os.path.join("cv-workspace", f"openai-response-{timestamp}.md")
+        with open(openai_response_file, "w", encoding="utf-8") as f:
+            f.write(markdown_content)
+        console.print(f"[bold yellow]OpenAI response saved to: {openai_response_file}[/bold yellow]")
+
         # Save the Markdown file
-        output_md_file = os.path.join(
-            "cv-workspace", sections_file.replace(".optimized_sections.json", ".md")
-        )
-
         with open(output_md_file, "w", encoding="utf-8") as f:
-            f.write(markdown_content.replace("```markdown", "").replace("```", ""))
-
-    # Add language suffix to PDF filename
-    output_pdf_file = output_md_file.replace(".md", f"_{language.lower()}.pdf")
-
-    console.print(f"[bold cyan]Converting Markdown to PDF: {output_md_file}[/bold cyan]")
-
-    # Convert Markdown to PDF using Pandoc
-    try:
-        pandoc_cmd = [
-            "pandoc",
-            output_md_file,
-            "-o", output_pdf_file,
-            "--pdf-engine=xelatex",
-            "--template=eisvogel",
-            "--listings",
-            "--toc",
-            "--toc-depth=2",
-            "--number-sections",
-            "--highlight-style=tango",
-            "--variable", "colorlinks:true",
-            "--variable", "linkcolor:blue",
-            "--variable", "urlcolor:blue",
-            "--variable", "toccolor:blue",
-        ]
-        
-        result = subprocess.run(pandoc_cmd, check=False, capture_output=True, text=True)
-        
-        if result.returncode != 0:
-            console.print(f"[bold red]Error during PDF export:[/bold red]")
-            console.print(result.stderr)
+            f.write(markdown_content)
             
-            # Verificar si el error está relacionado con paquetes LaTeX faltantes
-            if "biblatex.sty not found" in result.stderr or "Package biblatex Error" in result.stderr:
-                console.print("[bold red]Missing LaTeX packages detected.[/bold red]")
-                console.print("[bold yellow]Please install the required LaTeX packages:[/bold yellow]")
-                console.print("""
+        console.print(f"[bold green]Markdown content saved to: {output_md_file}[/bold green]")
+
+        # Add language suffix to PDF filename
+        output_pdf_file = output_md_file.replace(".md", f"_{language.lower()}.pdf")
+
+        console.print(f"[bold cyan]Converting Markdown to PDF: {output_md_file}[/bold cyan]")
+
+        # Convert Markdown to PDF using Pandoc
+        try:
+            # Create a temporary file with the exact content we want to convert
+            temp_md_file = os.path.join("cv-workspace", "temp_for_pandoc.md")
+            with open(temp_md_file, "w", encoding="utf-8") as f:
+                f.write(markdown_content)
+                
+            pandoc_cmd = [
+                "pandoc",
+                temp_md_file,  # Use the temporary file instead of output_md_file
+                "-o", output_pdf_file,
+                "--pdf-engine=xelatex",
+                "--template=eisvogel",
+                "--listings",
+                "--toc",
+                "--toc-depth=2",
+                "--number-sections",
+                "--highlight-style=tango",
+                "--variable", "colorlinks:true",
+                "--variable", "linkcolor:blue",
+                "--variable", "urlcolor:blue",
+                "--variable", "toccolor:blue",
+            ]
+            
+            result = subprocess.run(pandoc_cmd, check=False, capture_output=True, text=True)
+            
+            # Clean up the temporary file
+            if os.path.exists(temp_md_file):
+                os.remove(temp_md_file)
+            
+            if result.returncode != 0:
+                console.print(f"[bold red]Error during PDF export:[/bold red]")
+                console.print(result.stderr)
+                
+                # Verificar si el error está relacionado con paquetes LaTeX faltantes
+                if "biblatex.sty not found" in result.stderr or "Package biblatex Error" in result.stderr:
+                    console.print("[bold red]Missing LaTeX packages detected.[/bold red]")
+                    console.print("[bold yellow]Please install the required LaTeX packages:[/bold yellow]")
+                    console.print("""
 For Ubuntu/Debian:
 ```
 sudo apt-get update
@@ -415,18 +522,18 @@ For Fedora:
 sudo dnf install texlive-scheme-full
 ```
 """)
-            else:
-                console.print("[bold yellow]You can edit the Markdown file manually and try again.[/bold yellow]")
-            return
-        
-        console.print(
-            f"[bold green]PDF successfully exported: {output_pdf_file}[/bold green]"
-        )
-    except Exception as e:
-        console.print(f"[bold red]Error during PDF export: {e}[/bold red]")
-        console.print(
-            "[bold yellow]You can edit the Markdown file manually and try again.[/bold yellow]"
-        )
+                else:
+                    console.print("[bold yellow]You can edit the Markdown file manually and try again.[/bold yellow]")
+                return
+            
+            console.print(
+                f"[bold green]PDF successfully exported: {output_pdf_file}[/bold green]"
+            )
+        except Exception as e:
+            console.print(f"[bold red]Error during PDF export: {e}[/bold red]")
+            console.print(
+                "[bold yellow]You can edit the Markdown file manually and try again.[/bold yellow]"
+            )
 
 if __name__ == "__main__":
     export_pdf() 
