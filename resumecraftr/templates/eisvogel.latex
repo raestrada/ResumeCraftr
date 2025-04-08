@@ -1,0 +1,166 @@
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
+%----------------------------------------------------------------------------------------
+
+\documentclass[11pt, a4paper]{article} % Default font size and paper size
+
+\usepackage[utf8]{inputenc} % Required for inputting international characters
+\usepackage[T1]{fontenc} % Output font encoding for international characters
+
+\usepackage{mathpazo} % Use the Palatino font by default
+
+\usepackage[backend=biber, style=authoryear, sorting=nyt]{biblatex} % Use the bibtex backend with the authoryear citation style (which resembles APA)
+
+\usepackage[autostyle=true]{csquotes} % Required to generate language-dependent quotes in the bibliography
+
+\usepackage[scale=0.96]{geometry} % Reduce document margins
+\setlength{\parindent}{0pt} % Remove paragraph indentation
+
+\usepackage{hyperref} % Required for hyperlinks
+\hypersetup{
+    colorlinks=true, % Set to false to use colored boxes instead of colored text
+    linkcolor=blue, % The color of internal references
+    citecolor=blue, % The color of citations
+    urlcolor=blue, % The color of external links
+    menucolor=blue, % The color of the Acrobat menu buttons
+    filecolor=blue, % The color of local file links
+}
+
+\usepackage{graphicx} % Required for including images
+\graphicspath{{images/}} % The path to the images folder
+
+\usepackage{booktabs} % Required for better table rules
+
+\usepackage{enumitem} % Required for list customization
+\setlist{noitemsep} % Reduce spacing between bullet points and numbered lists
+
+\usepackage{amssymb} % Required for some math symbols
+
+\usepackage{xcolor} % Required for specifying custom colors
+\definecolor{primary}{HTML}{2E3338} % The primary color of the document
+
+\usepackage{titlesec} % Required for customizing section and chapter styles
+\titleformat{\section}{\Large\bfseries\color{primary}}{\thesection}{1em}{} % Section style
+\titleformat{\subsection}{\large\bfseries\color{primary}}{\thesubsection}{1em}{} % Subsection style
+
+\usepackage{fancyhdr} % Required for customizing headers and footers
+\pagestyle{fancy} % Enable the fancy page style
+\fancyhead{} % Clear the header
+\fancyfoot{} % Clear the footer
+\fancyhead[C]{\textit{\leftmark}} % Add the section name to the left header
+\fancyfoot[C]{\thepage} % Add the page number to the center footer
+\renewcommand{\headrulewidth}{0.4pt} % Thinner horizontal rule under the header
+\renewcommand{\footrulewidth}{0.4pt} % Thinner horizontal rule above the footer
+
+%----------------------------------------------------------------------------------------
+%	DOCUMENT INFORMATION
+%----------------------------------------------------------------------------------------
+
+\title{\textbf{Resume}} % The document title
+\author{John Doe} % Your name
+\date{\today} % The date, automatically formatted
+
+%----------------------------------------------------------------------------------------
+
+\begin{document}
+
+%----------------------------------------------------------------------------------------
+%	TITLE SECTION
+%----------------------------------------------------------------------------------------
+
+\maketitle % Print the title section
+
+%----------------------------------------------------------------------------------------
+%	OBJECTIVE OR SUMMARY SECTION
+%----------------------------------------------------------------------------------------
+
+\section{Professional Summary}
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent in mollis tellus, sed faucibus lectus. Vivamus semper scelerisque dui, non sagittis neque volutpat id. Duis sagittis mi id tincidunt feugiat.
+
+%----------------------------------------------------------------------------------------
+%	EXPERIENCE SECTION
+%----------------------------------------------------------------------------------------
+
+\section{Experience}
+
+\begin{tabular}{p{0.15\textwidth}p{0.85\textwidth}}
+\textbf{2018 -- Present} & \textbf{Senior Software Engineer} \\
+& \textit{Company Name} \\
+& \begin{itemize}[noitemsep,topsep=0pt]
+\item Led development of a new feature that increased user engagement by 25\%
+\item Managed a team of 5 developers and 2 designers
+\item Implemented CI/CD pipeline reducing deployment time by 40\%
+\end{itemize} \\
+\\
+\textbf{2015 -- 2018} & \textbf{Software Engineer} \\
+& \textit{Previous Company} \\
+& \begin{itemize}[noitemsep,topsep=0pt]
+\item Developed and maintained multiple web applications using React and Node.js
+\item Collaborated with UX designers to implement responsive designs
+\item Optimized database queries resulting in 30\% faster page load times
+\end{itemize}
+\end{tabular}
+
+%----------------------------------------------------------------------------------------
+%	EDUCATION SECTION
+%----------------------------------------------------------------------------------------
+
+\section{Education}
+
+\begin{tabular}{p{0.15\textwidth}p{0.85\textwidth}}
+\textbf{2011 -- 2015} & \textbf{Bachelor of Science in Computer Science} \\
+& \textit{University Name} \\
+& GPA: 3.8/4.0
+\end{tabular}
+
+%----------------------------------------------------------------------------------------
+%	SKILLS SECTION
+%----------------------------------------------------------------------------------------
+
+\section{Skills}
+
+\begin{tabular}{p{0.15\textwidth}p{0.85\textwidth}}
+\textbf{Languages} & English (Native), Spanish (Fluent) \\
+\textbf{Programming} & JavaScript, Python, Java, C\# \\
+\textbf{Technologies} & React, Node.js, Docker, AWS \\
+\textbf{Tools} & Git, Jenkins, Jira, Confluence
+\end{tabular}
+
+%----------------------------------------------------------------------------------------
+%	PROJECTS SECTION
+%----------------------------------------------------------------------------------------
+
+\section{Projects}
+
+\begin{tabular}{p{0.15\textwidth}p{0.85\textwidth}}
+\textbf{2020} & \textbf{E-commerce Platform} \\
+& \begin{itemize}[noitemsep,topsep=0pt]
+\item Developed a full-stack e-commerce platform using React and Node.js
+\item Implemented payment processing with Stripe API
+\item Deployed on AWS with auto-scaling configuration
+\end{itemize} \\
+\\
+\textbf{2019} & \textbf{Mobile App} \\
+& \begin{itemize}[noitemsep,topsep=0pt]
+\item Created a cross-platform mobile app using React Native
+\item Integrated with RESTful APIs for real-time data
+\item Published on both App Store and Google Play
+\end{itemize}
+\end{tabular}
+
+%----------------------------------------------------------------------------------------
+%	CERTIFICATIONS SECTION
+%----------------------------------------------------------------------------------------
+
+\section{Certifications}
+
+\begin{tabular}{p{0.15\textwidth}p{0.85\textwidth}}
+\textbf{2021} & AWS Certified Solutions Architect \\
+\textbf{2020} & Google Cloud Professional Cloud Architect \\
+\textbf{2019} & Microsoft Certified: Azure Developer Associate
+\end{tabular}
+
+%----------------------------------------------------------------------------------------
+
+\end{document} 

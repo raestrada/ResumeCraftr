@@ -241,7 +241,14 @@ Once you're satisfied with your resume, you can export it to PDF using:
 resumecraftr export-pdf
 ```
 
-This command will:
+By default, the resume will be generated in the language specified in your `resumecraftr.json` file (set during the `setup` command). If you want to generate the resume in a different language, use the `--translate` option:
+
+```bash
+resumecraftr export-pdf --translate EN  # Generate in English
+resumecraftr export-pdf --translate ES  # Generate in Spanish
+```
+
+The command will:
 1. Find all `.extracted_sections.json` files in your workspace
 2. Let you choose which one to use if multiple files exist
 3. Generate a Markdown file and convert it to PDF using Pandoc

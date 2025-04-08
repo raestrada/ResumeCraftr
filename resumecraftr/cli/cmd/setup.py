@@ -21,7 +21,20 @@ except ModuleNotFoundError:
     )
     MD_TEMPLATE_SRC = None
 
+try:
+    with importlib.resources.path(
+        "resumecraftr.templates", "eisvogel.latex"
+    ) as eisvogel_template_path:
+        EISVOGEL_TEMPLATE_SRC = str(eisvogel_template_path)
+except ModuleNotFoundError:
+    console.print(
+        "[bold red]Error: Could not locate the eisvogel template file inside the installed package.[/bold red]"
+    )
+    EISVOGEL_TEMPLATE_SRC = None
+
 MD_TEMPLATE_DEST = os.path.join("cv-workspace", "resume_template.md")
+PANDOC_TEMPLATES_DIR = os.path.expanduser("~/.local/share/pandoc/templates")
+EISVOGEL_TEMPLATE_DEST = os.path.join(PANDOC_TEMPLATES_DIR, "eisvogel.latex")
 
 DEFAULT_CONFIG = {
     "primary_language": "EN",
@@ -72,6 +85,24 @@ def setup(language, gpt_model):
     else:
         console.print(
             f"[bold yellow]Markdown template already exists in workspace:[/bold yellow] {MD_TEMPLATE_DEST}"
+        )
+    
+    # Install eisvogel template for Pandoc
+    if os.path.exists(EISVOGEL_TEMPLATE_SRC):
+        # Create pandoc templates directory if it doesn't exist
+        os.makedirs(PANDOC_TEMPLATES_DIR, exist_ok=True)
+        
+        # Copy eisvogel template if it doesn't exist
+        if not os.path.exists(EISVOGEL_TEMPLATE_DEST):
+            shutil.copy(EISVOGEL_TEMPLATE_SRC, EISVOGEL_TEMPLATE_DEST)
+            console.print(f"[bold green]Eisvogel template installed for Pandoc:[/bold green] {EISVOGEL_TEMPLATE_DEST}")
+        else:
+            console.print(
+                f"[bold yellow]Eisvogel template already installed for Pandoc:[/bold yellow] {EISVOGEL_TEMPLATE_DEST}"
+            )
+    else:
+        console.print(
+            f"[bold red]Eisvogel template source not found at:[/bold red] {EISVOGEL_TEMPLATE_SRC}"
         )
 
     console.print("[bold green]Workspace initialized successfully![/bold green]") 

@@ -4,6 +4,11 @@ version = "0.1.0"
 description = "AI-powered resume optimizer and ATS-friendly CV generator."
 authors = ["Your Name <you@example.com>"]
 license = "MIT"
+packages = [
+    { include = "resumecraftr" },
+    { include = "resumecraftr/templates/*.md" },
+    { include = "resumecraftr/templates/*.latex" }
+]
 
 [tool.poetry.dependencies]
 python = ">=3.10"

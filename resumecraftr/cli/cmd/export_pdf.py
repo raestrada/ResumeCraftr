@@ -2,8 +2,10 @@ import click
 import os
 import json
 import subprocess
+import shutil
 from rich.console import Console
 from rich.prompt import Prompt
+from rich.markdown import Markdown
 from resumecraftr.cli.agent import execute_prompt, create_or_get_agent
 from resumecraftr.cli.prompts.pdf import MARKDOWN_PROMPT
 
@@ -11,6 +13,8 @@ console = Console()
 CONFIG_FILE = "cv-workspace/resumecraftr.json"
 MD_TEMPLATE = "cv-workspace/resume_template.md"
 CUSTOM_PROMPT = "cv-workspace/custom.md"
+EISVOGEL_TEMPLATE = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))), "templates", "eisvogel.latex")
+PANDOC_TEMPLATES_DIR = os.path.expanduser("~/.local/share/pandoc/templates")
 
 def check_pandoc():
     """Check if pandoc is installed and provide installation instructions if not."""
@@ -24,6 +28,24 @@ def check_pandoc():
         return True
     except (FileNotFoundError, subprocess.CalledProcessError):
         return False
+
+def ensure_eisvogel_template():
+    """Ensure the eisvogel template is available in the pandoc templates directory."""
+    # Create pandoc templates directory if it doesn't exist
+    os.makedirs(PANDOC_TEMPLATES_DIR, exist_ok=True)
+    
+    # Check if eisvogel template already exists
+    eisvogel_path = os.path.join(PANDOC_TEMPLATES_DIR, "eisvogel.latex")
+    if not os.path.exists(eisvogel_path):
+        # Copy the template from our package to the pandoc templates directory
+        try:
+            shutil.copy2(EISVOGEL_TEMPLATE, eisvogel_path)
+            console.print("[bold green]Successfully installed eisvogel template.[/bold green]")
+            return True
+        except Exception as e:
+            console.print(f"[bold red]Error installing eisvogel template: {e}[/bold red]")
+            return False
+    return True
 
 def print_pandoc_installation_guide():
     """Prints installation instructions for Pandoc in Markdown format using rich."""
@@ -74,14 +96,28 @@ Once installed, retry running `resumecraftr export-pdf`! ✅
     console.print(Markdown(instructions))
 
 @click.command()
-def export_pdf():
-    """Export a PDF resume using Pandoc to convert from Markdown to PDF."""
+@click.option(
+    "--translate",
+    "-t",
+    help="Translate the resume to a different language (e.g., EN, ES). If not provided, uses the language from resumecraftr.json",
+)
+def export_pdf(translate):
+    """Export a PDF resume using Pandoc to convert from Markdown to PDF.
+    
+    By default, the resume will be generated in the language specified in resumecraftr.json.
+    Use the --translate option to generate the resume in a different language.
+    """
     # Only create the agent when we're about to use OpenAI
     create_or_get_agent("ResumeCraftr Agent PDF gen")
 
     if not check_pandoc():
         console.print("[bold red]Error: Pandoc is not installed.[/bold red]")
         print_pandoc_installation_guide()
+        return
+
+    # Ensure eisvogel template is available
+    if not ensure_eisvogel_template():
+        console.print("[bold red]Error: Failed to install eisvogel template.[/bold red]")
         return
 
     # Load configuration
@@ -93,6 +129,10 @@ def export_pdf():
 
     with open(CONFIG_FILE, "r", encoding="utf-8") as f:
         config = json.load(f)
+
+    # Determine the language to use
+    language = translate if translate else config.get("primary_language", "EN")
+    console.print(f"[bold blue]Generating resume in language: {language}[/bold blue]")
 
     with open(CUSTOM_PROMPT, "r", encoding="utf-8") as f:
         custom_promt = f.readlines()
@@ -176,7 +216,7 @@ def export_pdf():
             md_template=md_template,
             optimized_sections=optimized_sections_text,
             job_description=job_description,
-            language=config.get("primary_language"),
+            language=language,
             custom=custom_promt
         )
         .replace("{{", "{")
@@ -196,7 +236,8 @@ def export_pdf():
     output_md_file = os.path.join(
         "cv-workspace", sections_file.replace(".optimized_sections.json", ".md")
     )
-    output_pdf_file = output_md_file.replace(".md", ".pdf")
+    # Add language suffix to PDF filename
+    output_pdf_file = output_md_file.replace(".md", f"_{language.lower()}.pdf")
 
     with open(output_md_file, "w", encoding="utf-8") as f:
         f.write(markdown_content.replace("```markdown", "").replace("```", ""))
@@ -205,25 +246,24 @@ def export_pdf():
 
     # Convert Markdown to PDF using Pandoc
     try:
-        subprocess.run(
-            [
-                "pandoc",
-                output_md_file,
-                "-o", output_pdf_file,
-                "--pdf-engine=xelatex",
-                "--template=eisvogel",
-                "--listings",
-                "--toc",
-                "--toc-depth=2",
-                "--number-sections",
-                "--highlight-style=tango",
-                "--variable", "colorlinks:true",
-                "--variable", "linkcolor:blue",
-                "--variable", "urlcolor:blue",
-                "--variable", "toccolor:blue",
-            ],
-            check=True,
-        )
+        pandoc_cmd = [
+            "pandoc",
+            output_md_file,
+            "-o", output_pdf_file,
+            "--pdf-engine=xelatex",
+            "--template=eisvogel",
+            "--listings",
+            "--toc",
+            "--toc-depth=2",
+            "--number-sections",
+            "--highlight-style=tango",
+            "--variable", "colorlinks:true",
+            "--variable", "linkcolor:blue",
+            "--variable", "urlcolor:blue",
+            "--variable", "toccolor:blue",
+        ]
+        
+        subprocess.run(pandoc_cmd, check=True)
         console.print(
             f"[bold green]PDF successfully exported: {output_pdf_file}[/bold green]"
         )
