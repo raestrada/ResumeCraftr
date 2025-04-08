@@ -14,7 +14,7 @@ JOBS_DIR = os.path.join("cv-workspace", "job_descriptions")
 @click.option(
     "--file", "-f", type=click.Path(exists=True), help="Path to a job description file."
 )
-def add_job_description(job_name, content, file):
+def add_job(job_name, content, file):
     """Add a job description by copying content or from a file."""
     os.makedirs(JOBS_DIR, exist_ok=True)
 
@@ -54,4 +54,4 @@ def add_job_description(job_name, content, file):
     )
 
 if __name__ == "__main__":
-    add_job_description()
+    add_job() 

@@ -1,6 +1,6 @@
 # Getting Started with ResumeCraftr
 
-ResumeCraftr is an ATS-focused minimalist CV generator that leverages OpenAI and LaTeX to parse, optimize, and format resumes. This guide will walk you through the setup and usage of ResumeCraftr, along with tips for customizing your experience.
+ResumeCraftr is an ATS-focused minimalist CV generator that leverages OpenAI and Pandoc to parse, optimize, and format resumes. This guide will walk you through the setup and usage of ResumeCraftr, along with tips for customizing your experience.
 
 ---
 
@@ -14,6 +14,10 @@ ResumeCraftr now fully supports Windows, making it easier for more users to opti
 
 ResumeCraftr now allows you to create and manage CV sections interactively without needing to parse an existing CV. This makes it easier to build your resume from scratch or update specific sections.
 
+### 🌟 Improved PDF Generation! 📄
+
+ResumeCraftr now uses Pandoc to convert Markdown to PDF, making the process more robust and less prone to errors. This also makes it easier to preview and edit your resume before generating the final PDF.
+
 ---
 
 ## Installation
@@ -24,7 +28,39 @@ Ensure you have `pipx` installed, then install ResumeCraftr with:
 pipx install git+https://github.com/raestrada/ResumeCraftr.git@v0.4.0
 ```
 
-Additionally, make sure you have a LaTeX distribution installed, specifically one that includes `xelatex`.
+Additionally, make sure you have Pandoc installed:
+
+### 🟢 Windows
+1. Download and install [Pandoc](https://pandoc.org/installing.html).
+2. Ensure `pandoc` is in your system's PATH by running:
+   ```
+   pandoc --version
+   ```
+   If not, restart your computer or manually add the Pandoc directory to your PATH.
+
+### 🍏 macOS
+1. Install Pandoc via Homebrew:
+   ```
+   brew install pandoc
+   ```
+2. Verify the installation:
+   ```
+   pandoc --version
+   ```
+
+### 🐧 Linux
+For Debian/Ubuntu:
+   ```
+   sudo apt update && sudo apt install pandoc
+   ```
+For Arch Linux:
+   ```
+   sudo pacman -S pandoc
+   ```
+For Fedora:
+   ```
+   sudo dnf install pandoc
+   ```
 
 ---
 
@@ -33,7 +69,7 @@ Additionally, make sure you have a LaTeX distribution installed, specifically on
 ResumeCraftr operates within a dedicated workspace directory called `cv-workspace`. To set up this workspace, run:
 
 ```bash
-resumecraftr init --language EN --gpt-model gpt-4o-mini
+resumecraftr setup --language EN --gpt-model gpt-4o-mini
 ```
 
 ### Key Options:
@@ -41,7 +77,7 @@ resumecraftr init --language EN --gpt-model gpt-4o-mini
 - `--gpt-model`: Specifies the GPT model to use. For testing, we recommend using `gpt-4o-mini`.
 
 This will create the `cv-workspace` directory with the following files:
-- **`cv-workspace/resume_template.tex`**: The LaTeX template used for PDF generation. You can modify this file to customize the CV layout and style.
+- **`cv-workspace/resume_template.md`**: The Markdown template used for PDF generation. You can modify this file to customize the CV layout and style.
 - **`cv-workspace/resumecraftr.json`**: The main configuration file.
 - **`cv-workspace/custom.md`**: A file for adding supplementary information and custom instructions for ChatGPT.
 
@@ -55,8 +91,7 @@ Here's an example of a `resumecraftr.json` configuration file:
 {
     "primary_language": "ES",
     "output_format": "pdf",
-    "template_name": "resume_template.tex",
-    "max_latex_corrections": 5,
+    "template_name": "resume_template.md",
     "chat_gpt": {
         "model": "gpt-4o-mini",
         "temperature": 0.7,
@@ -73,8 +108,7 @@ Here's an example of a `resumecraftr.json` configuration file:
 
 - **`primary_language`**: The language of the CV and job descriptions (e.g., `EN`, `ES`).
 - **`output_format`**: Output format, typically `pdf`.
-- **`template_name`**: Name of the LaTeX template used for PDF generation.
-- **`max_latex_corrections`**: Maximum number of attempts to correct LaTeX errors during PDF generation (default: 5).
+- **`template_name`**: Name of the Markdown template used for PDF generation.
 - **`chat_gpt`**: OpenAI settings such as the model, temperature, and top_p.
 - **`extracted_files`**: List of extracted text files from your CVs.
 - **`job_descriptions`**: List of job description files used for optimization.
@@ -100,7 +134,7 @@ ResumeCraftr now allows you to create a CV from scratch without needing to parse
 To create a new CV, run:
 
 ```bash
-resumecraftr create-cv my_cv
+resumecraftr new-cv my_cv
 ```
 
 This command creates a new CV with the name `my_cv` and initializes all sections with empty values.
@@ -127,7 +161,7 @@ ResumeCraftr supports the following sections that you can add to your CV:
 To add or update a specific section in your CV, run:
 
 ```bash
-resumecraftr add-section my_cv "Work Experience"
+resumecraftr edit-section my_cv "Work Experience"
 ```
 
 This command will guide you through the process of adding or updating the specified section. You can add multiple entries for sections like Work Experience, Projects, Education, etc.
@@ -137,148 +171,80 @@ This command will guide you through the process of adding or updating the specif
 To view the contents of your CV, run:
 
 ```bash
-resumecraftr show-cv my_cv
+resumecraftr view-cv my_cv
 ```
 
 This command displays all sections of your CV in a structured format.
 
 ---
 
-## Extracting Resume Text
+## Importing and Parsing Resumes
 
-ResumeCraftr can extract text from supported document formats (`.pdf`, `.docx`, `.txt`, `.md`). Place your CV inside `cv-workspace` and run:
+ResumeCraftr can import text from supported document formats (`.pdf`, `.docx`, `.txt`, `.md`). Place your CV inside `cv-workspace` and run:
 
 ```bash
-resumecraftr extract /path/to/Resume.pdf
+resumecraftr import-cv /path/to/Resume.pdf
 ```
 
 This will generate a `.txt` file containing the extracted raw text.
 
----
+### Parsing into Structured Sections
 
-## Extracting Structured Sections
-
-To classify the extracted resume text into structured sections such as contact details, experience, skills, and education, use:
+To classify the imported resume text into structured sections such as contact details, experience, skills, and education, use:
 
 ```bash
-resumecraftr extract-sections
+resumecraftr parse-cv
 ```
 
 This command creates an `.extracted_sections.json` file, which contains a structured version of your CV, making it easier to optimize.
 
-### Generating a PDF from Extracted Sections
-
-If you want to generate a PDF directly from the extracted sections without going through the optimization process, use:
-
-```bash
-resumecraftr extract-pdf
-```
-
-This command will:
-1. Find all `.extracted_sections.json` files in your workspace
-2. Let you choose which one to use if multiple files exist
-3. Generate a LaTeX file and compile it to PDF
-4. Save the resulting PDF in your workspace
-
-This is useful when you want to see how your CV looks after extraction but before optimization, or when you're satisfied with the extracted content and don't need to optimize it for a specific job.
-
 ---
 
-## Adding a Job Description and Optimizing Your Resume
+## Adding a Job Description and Tailoring Your Resume
 
 ### Adding a Job Description
 To tailor your resume for a specific job description, run:
 
 ```bash
-resumecraftr add-job-description "Principal Engineer XYZ" --content "About the job... (job description text here)"
+resumecraftr add-job
 ```
 
-### Optimizing the Resume
-After adding the job description, optimize the resume with:
+This will prompt you to either paste the job description directly or provide a file containing the job description.
+
+### Tailoring the Resume
+After adding the job description, tailor the resume with:
 
 ```bash
-resumecraftr optimize
+resumecraftr tailor-cv
 ```
 
 This step ensures that your resume highlights relevant skills and experience based on the job description. ResumeCraftr uses OpenAI to rewrite and structure the content to be ATS-friendly.
 
 ### Language Optimization
 
-One of the key benefits of the optimize command is that it rewrites all content in the language you configured during initialization. This means:
+One of the key benefits of the tailor command is that it rewrites all content in the language you configured during initialization. This means:
 
 - **Grammar and Spelling**: The AI automatically corrects grammatical errors and spelling mistakes
 - **Language Consistency**: Ensures all content follows the same language style and conventions
 - **Professional Tone**: Adjusts the writing to maintain a professional tone appropriate for resumes
 - **Cultural Adaptation**: Adapts content to match the cultural expectations of the target language
 
-For example, if you configured ResumeCraftr with `--language ES` (Spanish), the optimize command will rewrite your resume in proper Spanish, correcting any language errors and ensuring it follows Spanish resume conventions.
+For example, if you configured ResumeCraftr with `--language ES` (Spanish), the tailor command will rewrite your resume in proper Spanish, correcting any language errors and ensuring it follows Spanish resume conventions.
 
 ---
 
-## Generating a PDF Resume
+## Exporting Your Resume to PDF
 
-Once your resume is optimized, generate a PDF using:
-
-```bash
-resumecraftr toPdf
-```
-
-ResumeCraftr uses OpenAI to:
-1. Generate the LaTeX file based on the provided template and structured sections.
-2. Automatically correct any LaTeX errors to ensure a seamless PDF generation.
-
-The resulting PDF will be saved in `cv-workspace/`.
-
-### Alternative PDF Generation Methods
-
-ResumeCraftr provides several alternative methods for generating PDFs without using OpenAI:
-
-#### Generate PDF from Extracted Sections
-
-If you've extracted sections from a PDF but haven't optimized them yet, you can generate a PDF directly:
+Once you're satisfied with your resume, you can export it to PDF using:
 
 ```bash
-resumecraftr extract-pdf
+resumecraftr export-pdf
 ```
 
 This command will:
-1. List all `.extracted_sections.json` files in your workspace
-2. Let you choose which one to use
-3. Generate a PDF directly from the extracted sections without optimization
+1. Find all `.extracted_sections.json` files in your workspace
+2. Let you choose which one to use if multiple files exist
+3. Generate a Markdown file and convert it to PDF using Pandoc
+4. Save the resulting PDF in your workspace
 
-#### Generate PDF from LaTeX File
-
-If you've manually edited a LaTeX file or want to regenerate a PDF from an existing LaTeX file:
-
-```bash
-resumecraftr tex-to-pdf [path/to/file.tex]
-```
-
-This command will:
-1. List all `.tex` files in your workspace (excluding the template)
-2. Let you choose which one to use
-3. Compile the selected LaTeX file to generate a PDF
-
-This is particularly useful when:
-- The automatic LaTeX generation fails
-- You want to make manual corrections to the LaTeX file
-- You want to experiment with different LaTeX formatting
-
----
-
-## Changing Models or Recreating Agents
-
-To change the GPT model:
-
-1. Change de model on ```resumecraftr.json```
-2. Delete the existing agents using the following command:
-
-```bash
-resumecraftr delete-agents
-```
-
-This ensures that any new model preferences are applied to subsequent optimizations.
-
----
-
-With these steps, you can create, extract, optimize, and generate a professionally formatted ATS-friendly resume with ResumeCraftr. 🚀
+The PDF will be formatted according to the template in `resume_template.md`, which you can customize to match your preferred style.

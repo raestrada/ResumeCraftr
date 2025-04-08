@@ -43,12 +43,12 @@ def optimize_section(config, section_name, content, job_description):
 
 
 @click.command()
-def optimize_resume():
-    """Optimize a resume based on a job description."""
+def tailor_cv():
+    """Tailor a CV based on a job description."""
     # Cargar configuración
     if not os.path.exists(CONFIG_FILE):
         console.print(
-            "[bold red]Configuration file not found. Run 'resumecraftr init' first.[/bold red]"
+            "[bold red]Configuration file not found. Run 'resumecraftr setup' first.[/bold red]"
         )
         return
 
@@ -63,7 +63,7 @@ def optimize_resume():
 
     if not extracted_files:
         console.print(
-            "[bold red]No extracted CV sections found in configuration.[/bold red]"
+            "[bold red]No parsed CV sections found in configuration.[/bold red]"
         )
         return
 
@@ -82,7 +82,7 @@ def optimize_resume():
 
     if len(extracted_files) > 1:
         sections_file = Prompt.ask(
-            "Multiple extracted CV files detected. Choose one", choices=extracted_files
+            "Multiple parsed CV files detected. Choose one", choices=extracted_files
         )
 
     if len(job_descriptions) > 1:
@@ -108,7 +108,7 @@ def optimize_resume():
         return
 
     console.print(
-        f"[bold blue]Optimizing resume using: {sections_file} and {job_desc_file}[/bold blue]"
+        f"[bold blue]Tailoring CV using: {sections_file} and {job_desc_file}[/bold blue]"
     )
 
     with open(sections_path, "r", encoding="utf-8") as f:
@@ -129,7 +129,7 @@ def optimize_resume():
     with open(job_desc_path, "r", encoding="utf-8") as f:
         job_description = f.read()
 
-    console.print("[cyan]Processing optimization in parallel...[/cyan]")
+    console.print("[cyan]Processing tailoring in parallel...[/cyan]")
 
     optimized_resume = {}
 
@@ -154,8 +154,8 @@ def optimize_resume():
         json.dump(optimized_resume, f, indent=4, ensure_ascii=False)
 
     merge_json_files(output_path, sections_path, output_path)
-    console.print(f"[bold green]Optimized resume saved to: {output_path}[/bold green]")
+    console.print(f"[bold green]Tailored CV saved to: {output_path}[/bold green]")
 
 
 if __name__ == "__main__":
-    optimize_resume()
+    tailor_cv() 

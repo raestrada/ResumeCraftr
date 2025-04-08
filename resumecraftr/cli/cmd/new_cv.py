@@ -33,7 +33,7 @@ def save_cv(cv_name, cv_data):
 def update_config_file(cv_name):
     """Update the resumecraftr.json file to include the new CV."""
     if not os.path.exists(CONFIG_FILE):
-        console.print("[bold red]Configuration file not found. Run 'resumecraftr init' first.[/bold red]")
+        console.print("[bold red]Configuration file not found. Run 'resumecraftr setup' first.[/bold red]")
         return False
     
     try:
@@ -78,7 +78,7 @@ def update_config_file(cv_name):
 
 @click.command()
 @click.argument("cv_name")
-def create_cv(cv_name):
+def new_cv(cv_name):
     """Create a new empty CV with the given name."""
     # Check if CV already exists
     cv_path = get_cv_path(cv_name)
@@ -123,12 +123,12 @@ def create_cv(cv_name):
 @click.command()
 @click.argument("cv_name")
 @click.argument("section")
-def add_section(cv_name, section):
+def edit_section(cv_name, section):
     """Add or update a section in a CV."""
     # Check if CV already exists
     cv_path = get_cv_path(cv_name)
     if not os.path.exists(cv_path):
-        console.print(f"[bold red]CV '{cv_name}' does not exist. Create it first with 'create-cv {cv_name}'[/bold red]")
+        console.print(f"[bold red]CV '{cv_name}' does not exist. Create it first with 'new-cv {cv_name}'[/bold red]")
         return
     
     cv_data = load_cv(cv_name)
@@ -241,18 +241,10 @@ def add_section(cv_name, section):
 
 @click.command()
 @click.argument("cv_name")
-def show_cv(cv_name):
+def view_cv(cv_name):
     """Display the contents of a CV."""
     # Check if CV already exists
     cv_path = get_cv_path(cv_name)
     if not os.path.exists(cv_path):
-        console.print(f"[bold red]CV '{cv_name}' does not exist. Create it first with 'create-cv {cv_name}'[/bold red]")
-        return
-    
-    cv_data = load_cv(cv_name)
-    
-    for section, content in cv_data.items():
-        console.print(Panel.fit(
-            json.dumps(content, indent=2, ensure_ascii=False),
-            title=f"[bold blue]{section}[/bold blue]"
-        )) 
+        console.print(f"[bold red]CV '{cv_name}' does not exist. Create it first with 'new-cv {cv_name}'[/bold red]")
+        return 

@@ -69,13 +69,13 @@ After installation, re-run:
    pandoc --version
    ```
 
-Once installed, retry running `resumecraftr extract-pdf`! ✅
+Once installed, retry running `resumecraftr export-pdf`! ✅
 """
     console.print(Markdown(instructions))
 
 @click.command()
-def extract_pdf():
-    """Generate a PDF resume directly from extracted sections without optimization."""
+def export_pdf():
+    """Export a PDF resume using Pandoc to convert from Markdown to PDF."""
     # Only create the agent when we're about to use OpenAI
     create_or_get_agent("ResumeCraftr Agent PDF gen")
 
@@ -87,7 +87,7 @@ def extract_pdf():
     # Load configuration
     if not os.path.exists(CONFIG_FILE):
         console.print(
-            "[bold red]Configuration file not found. Run 'resumecraftr init' first.[/bold red]"
+            "[bold red]Configuration file not found. Run 'resumecraftr setup' first.[/bold red]"
         )
         return
 
@@ -97,35 +97,34 @@ def extract_pdf():
     with open(CUSTOM_PROMPT, "r", encoding="utf-8") as f:
         custom_promt = f.readlines()
 
-    # Find extracted sections files
-    extracted_files = []
-    for file in os.listdir("cv-workspace"):
-        if file.endswith(".extracted_sections.json"):
-            extracted_files.append(file)
-
+    extracted_files = config.get("extracted_files", [])
     if not extracted_files:
         console.print(
-            "[bold red]No extracted CV sections found. Run 'resumecraftr extract-sections' first.[/bold red]"
+            "[bold red]No parsed CV sections found in configuration.[/bold red]"
         )
         return
 
+    extracted_files = [
+        f.replace(".txt", ".optimized_sections.json") for f in extracted_files
+    ]
     sections_file = extracted_files[0]
+
     if len(extracted_files) > 1:
         sections_file = Prompt.ask(
-            "Multiple extracted CV files detected. Choose one", choices=extracted_files
+            "Multiple tailored CV files detected. Choose one", choices=extracted_files
         )
 
     sections_path = os.path.abspath(os.path.join("cv-workspace", sections_file))
     if not os.path.exists(sections_path):
         console.print(
-            f"[bold red]Selected extracted sections file '{sections_file}' does not exist.[/bold red]"
+            f"[bold red]Selected tailored sections file '{sections_file}' does not exist.[/bold red]"
         )
         return
 
-    console.print(f"[bold blue]Generating PDF using: {sections_file}[/bold blue]")
+    console.print(f"[bold blue]Exporting PDF using: {sections_file}[/bold blue]")
 
     with open(sections_path, "r", encoding="utf-8") as f:
-        extracted_sections = json.load(f)
+        optimized_sections = json.load(f)
 
     # Load Markdown template
     if not os.path.exists(MD_TEMPLATE):
@@ -137,17 +136,46 @@ def extract_pdf():
     with open(MD_TEMPLATE, "r", encoding="utf-8") as f:
         md_template = f.read()
 
+    # Load extracted CV text
+    original_cv_text = ""
+    for txt_file in config.get("extracted_files", []):
+        txt_path = os.path.abspath(os.path.join("cv-workspace", txt_file))
+        if os.path.exists(txt_path):
+            with open(txt_path, "r", encoding="utf-8") as f:
+                original_cv_text = f.read()
+                break
+
+    # Load job description
+    job_desc_files = config.get("job_descriptions", [])
+    if not job_desc_files:
+        console.print(
+            "[bold red]No job descriptions found in configuration.[/bold red]"
+        )
+        return
+
+    job_desc_path = os.path.abspath(
+        os.path.join("cv-workspace", "job_descriptions", job_desc_files[0])
+    )
+    if not os.path.exists(job_desc_path):
+        console.print(
+            f"[bold red]Selected job description file '{job_desc_files[0]}' does not exist.[/bold red]"
+        )
+        return
+
+    with open(job_desc_path, "r", encoding="utf-8") as f:
+        job_description = f.read()
+
     # Convert JSON to string for OpenAI
-    extracted_sections_text = json.dumps(
-        extracted_sections, indent=4, ensure_ascii=False
+    optimized_sections_text = json.dumps(
+        optimized_sections, indent=4, ensure_ascii=False
     )
 
     # Generate the prompt
     prompt = (
         MARKDOWN_PROMPT.format(
             md_template=md_template,
-            optimized_sections=extracted_sections_text,
-            job_description="",  # No job description for direct PDF generation
+            optimized_sections=optimized_sections_text,
+            job_description=job_description,
             language=config.get("primary_language"),
             custom=custom_promt
         )
@@ -166,7 +194,7 @@ def extract_pdf():
 
     # Save the Markdown file
     output_md_file = os.path.join(
-        "cv-workspace", sections_file.replace(".extracted_sections.json", ".md")
+        "cv-workspace", sections_file.replace(".optimized_sections.json", ".md")
     )
     output_pdf_file = output_md_file.replace(".md", ".pdf")
 
@@ -197,13 +225,13 @@ def extract_pdf():
             check=True,
         )
         console.print(
-            f"[bold green]PDF successfully generated: {output_pdf_file}[/bold green]"
+            f"[bold green]PDF successfully exported: {output_pdf_file}[/bold green]"
         )
     except subprocess.CalledProcessError as e:
-        console.print(f"[bold red]Error during PDF generation: {e}[/bold red]")
+        console.print(f"[bold red]Error during PDF export: {e}[/bold red]")
         console.print(
             "[bold yellow]You can edit the Markdown file manually and try again.[/bold yellow]"
         )
 
 if __name__ == "__main__":
-    extract_pdf() 
+    export_pdf() 

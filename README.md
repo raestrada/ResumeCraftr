@@ -1,6 +1,6 @@
 # <img src="https://res.cloudinary.com/dyknhuvxt/image/upload/f_auto,q_auto/v1736189459/resumecraftr_eb7drc.png" alt="ResumeCraftr Logo" width="100" height="100"> ResumeCraftr - AI-powered ATS Resume Optimization 📄🤖
 
-Welcome to [**ResumeCraftr**](https://resumecraftr.app), the open-source tool designed to optimize resumes for ATS (Applicant Tracking Systems) using AI and LaTeX formatting. ResumeCraftr extracts, restructures, and formats CVs to ensure they meet ATS requirements while maintaining readability and professionalism.
+Welcome to [**ResumeCraftr**](https://resumecraftr.app), the open-source tool designed to optimize resumes for ATS (Applicant Tracking Systems) using AI and Markdown formatting. ResumeCraftr extracts, restructures, and formats CVs to ensure they meet ATS requirements while maintaining readability and professionalism.
 
 ---
 
@@ -43,55 +43,55 @@ Here are a few ways to get started with **ResumeCraftr**:
 ### Initialize a workspace:
 
 ```bash
-poetry run resumecraftr init --language EN
+poetry run resumecraftr setup --language EN
 ```
 
 ### Create a new CV from scratch:
 
 ```bash
-poetry run resumecraftr create-cv my_cv
+poetry run resumecraftr new-cv my_cv
 ```
 
 ### Add or update a section in your CV:
 
 ```bash
-poetry run resumecraftr add-section my_cv "Work Experience"
+poetry run resumecraftr edit-section my_cv "Work Experience"
 ```
 
 ### View your CV:
 
 ```bash
-poetry run resumecraftr show-cv my_cv
+poetry run resumecraftr view-cv my_cv
 ```
 
-### Extract text from a resume:
+### Import a CV from PDF:
 
 ```bash
-poetry run resumecraftr extract /Users/username/Documents/Personal/Resume.pdf
+poetry run resumecraftr import-cv /Users/username/Documents/Personal/Resume.pdf
 ```
 
-### Extract structured sections:
+### Parse a CV into sections:
 
 ```bash
-poetry run resumecraftr extract-sections
-```
-
-### Generate a PDF directly from extracted sections:
-
-```bash
-poetry run resumecraftr extract-pdf
-```
-
-### Generate a PDF directly from a LaTeX file (useful for manual corrections):
-
-```bash
-poetry run resumecraftr tex-to-pdf [path/to/file.tex]
+poetry run resumecraftr parse-cv
 ```
 
 ### Add a job description for optimization:
 
 ```bash
-poetry run resumecraftr toPdf
+poetry run resumecraftr add-job
+```
+
+### Tailor your CV to a job description:
+
+```bash
+poetry run resumecraftr tailor-cv
+```
+
+### Export your CV to PDF:
+
+```bash
+poetry run resumecraftr export-pdf
 ```
 
 ## Full Guide
@@ -105,9 +105,10 @@ For a complete guide, including more examples and instructions on how to fully l
 Applying for jobs requires a well-structured and ATS-optimized resume. **ResumeCraftr** helps you:
 
 - **Create resumes from scratch** with interactive section management.
-- **Extract resume content** from various document formats.
-- **Optimize resumes** to match job descriptions effectively.
-- **Generate professional LaTeX PDFs** with structured sections.
+- **Import resume content** from various document formats.
+- **Parse resumes** into structured sections.
+- **Tailor resumes** to match job descriptions effectively.
+- **Generate professional PDFs** with structured sections.
 - **Ensure ATS compatibility** while maintaining readability.
 
 With ResumeCraftr, your resume gets the best chance of passing ATS filters and standing out to recruiters.
