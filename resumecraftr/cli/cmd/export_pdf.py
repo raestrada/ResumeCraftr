@@ -2,22 +2,16 @@ import click
 import os
 import json
 import subprocess
-import shutil
-import time
 from rich.console import Console
 from rich.prompt import Prompt
-from rich.markdown import Markdown
 from resumecraftr.cli.agent import execute_prompt, create_or_get_agent
 from resumecraftr.cli.prompts.pdf import MARKDOWN_PROMPT
-import openai
 from datetime import datetime
 
 console = Console()
 CONFIG_FILE = "cv-workspace/resumecraftr.json"
 MD_TEMPLATE = "cv-workspace/resume_template.md"
 CUSTOM_PROMPT = "cv-workspace/custom.md"
-EISVOGEL_TEMPLATE = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))), "templates", "eisvogel.latex")
-PANDOC_TEMPLATES_DIR = os.path.expanduser("~/.local/share/pandoc/templates")
 
 def check_pandoc():
     """Check if pandoc is installed and provide installation instructions if not."""
@@ -31,73 +25,6 @@ def check_pandoc():
         return True
     except (FileNotFoundError, subprocess.CalledProcessError):
         return False
-
-def check_latex_packages():
-    """Check if required LaTeX packages are installed."""
-    required_packages = [
-        "biblatex",
-        "csquotes",
-        "enumitem",
-        "fancyhdr",
-        "geometry",
-        "graphicx",
-        "hyperref",
-        "listings",
-        "titlesec",
-        "xcolor"
-    ]
-    
-    # En sistemas Linux, es mejor asumir que los paquetes están instalados
-    # si el usuario está usando el sistema, ya que la verificación puede dar falsos positivos
-    if os.name == 'posix':  # Linux/Unix
-        console.print("[bold yellow]Skipping LaTeX package verification on Linux system.[/bold yellow]")
-        console.print("[bold yellow]If you encounter LaTeX errors, please install the required packages manually.[/bold yellow]")
-        return []
-    
-    missing_packages = []
-    
-    for package in required_packages:
-        try:
-            # Try to compile a minimal LaTeX document that uses the package
-            with open("temp_check.tex", "w") as f:
-                f.write(f"\\documentclass{{article}}\n\\usepackage{{{package}}}\n\\begin{{document}}\nTest\n\\end{{document}}")
-            
-            result = subprocess.run(
-                ["pdflatex", "-interaction=nonstopmode", "temp_check.tex"],
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                check=False
-            )
-            
-            if result.returncode != 0:
-                missing_packages.append(package)
-        except Exception:
-            missing_packages.append(package)
-        finally:
-            # Clean up temporary files
-            for ext in [".aux", ".log", ".pdf"]:
-                if os.path.exists(f"temp_check{ext}"):
-                    os.remove(f"temp_check{ext}")
-    
-    return missing_packages
-
-def ensure_eisvogel_template():
-    """Ensure the eisvogel template is available in the pandoc templates directory."""
-    # Create pandoc templates directory if it doesn't exist
-    os.makedirs(PANDOC_TEMPLATES_DIR, exist_ok=True)
-    
-    # Check if eisvogel template already exists
-    eisvogel_path = os.path.join(PANDOC_TEMPLATES_DIR, "eisvogel.latex")
-    if not os.path.exists(eisvogel_path):
-        # Copy the template from our package to the pandoc templates directory
-        try:
-            shutil.copy2(EISVOGEL_TEMPLATE, eisvogel_path)
-            console.print("[bold green]Successfully installed eisvogel template.[/bold green]")
-            return True
-        except Exception as e:
-            console.print(f"[bold red]Error installing eisvogel template: {e}[/bold red]")
-            return False
-    return True
 
 def print_pandoc_installation_guide():
     """Prints installation instructions for Pandoc in Markdown format using rich."""
@@ -144,45 +71,6 @@ After installation, re-run:
    ```
 
 Once installed, retry running `resumecraftr export-pdf`! ✅
-"""
-    console.print(Markdown(instructions))
-
-def print_latex_installation_guide(missing_packages):
-    """Prints installation instructions for missing LaTeX packages."""
-    instructions = f"""
-# 🚀 Installing Required LaTeX Packages
-
-ResumeCraftr requires the following LaTeX packages to generate PDFs:
-{', '.join(missing_packages)}
-
-### 🟢 Windows
-1. Install a complete LaTeX distribution like [MiKTeX](https://miktex.org/download) or [TeX Live](https://tug.org/texlive/windows.html).
-2. During installation, select "Install missing packages on the fly = Yes".
-
-### 🍏 macOS
-1. Install MacTeX:
-   ```
-   brew install --cask mactex
-   ```
-   Or for a smaller installation:
-   ```
-   brew install --cask basictex
-   ```
-2. After installation, open Terminal and run:
-   ```
-   sudo tlmgr update --self
-   sudo tlmgr install {' '.join(missing_packages)}
-   ```
-
-### 🐧 Linux (Ubuntu/Debian)
-```
-sudo apt-get update
-sudo apt-get install texlive-latex-base texlive-latex-extra texlive-latex-recommended texlive-publishers texlive-science
-```
-
-For other distributions, install the appropriate TeX Live packages.
-
-After installation, retry running `resumecraftr export-pdf`! ✅
 """
     console.print(Markdown(instructions))
 
@@ -260,6 +148,20 @@ def export_pdf(
             
         output_md_file = os.path.join("cv-workspace", md_file)
         console.print(f"[bold blue]Using OpenAI response file: {md_file}[/bold blue]")
+        
+        # Find the corresponding sections file
+        sections_files = [f for f in os.listdir("cv-workspace") if f.endswith(".optimized_sections.json")]
+        if not sections_files:
+            console.print("[bold red]No optimized CV sections files found. Please run 'resumecraftr tailor-cv' first.[/bold red]")
+            return
+            
+        if len(sections_files) > 1:
+            # Let user choose which sections file to use
+            sections_file = Prompt.ask(
+                "Multiple optimized CV files detected. Choose one", choices=sections_files
+            )
+        else:
+            sections_file = sections_files[0]
     else:
         # Normal flow - generate Markdown with OpenAI
         # Load the Markdown template
@@ -374,27 +276,21 @@ def export_pdf(
             output_md_file,
             "-o", output_pdf_file,
             "--pdf-engine=xelatex",
-            "--template=eisvogel",
-            "--listings",
-            "--toc",
-            "--toc-depth=2",
-            "--number-sections",
-            "--highlight-style=tango",
-            "--variable", "colorlinks:true",
-            "--variable", "linkcolor:blue",
-            "--variable", "urlcolor:blue",
-            "--variable", "toccolor:blue",
-            "--variable", "documentclass=article",
             "--variable", "mainfont=DejaVu Sans",
             "--variable", "sansfont=DejaVu Sans",
             "--variable", "monofont=DejaVu Sans Mono",
             "--variable", "fontsize=11pt",
             "--variable", "geometry=margin=2.5cm",
             "--variable", "linestretch=1.25",
-            "--variable", "header-includes=\\usepackage[utf8]{inputenc}\\usepackage[T1]{fontenc}\\usepackage{hyperref}\\usepackage{listings}\\usepackage{xcolor}",
+            "--variable", "colorlinks=true",
+            "--variable", "linkcolor=blue",
+            "--variable", "urlcolor=blue",
+            "--variable", "toccolor=blue",
+            "--variable", "documentclass=article",
+            "--variable", "header-includes=\\usepackage[utf8]{inputenc}\\usepackage[T1]{fontenc}\\usepackage{hyperref}",
             "--standalone",
             "--from", "markdown+yaml_metadata_block",
-            "--to", "latex",
+            "--to", "pdf",
         ]
         
         result = subprocess.run(pandoc_cmd, check=False, capture_output=True, text=True)
@@ -402,30 +298,7 @@ def export_pdf(
         if result.returncode != 0:
             console.print(f"[bold red]Error during PDF export:[/bold red]")
             console.print(result.stderr)
-            
-            # Verificar si el error está relacionado con paquetes LaTeX faltantes
-            if "biblatex.sty not found" in result.stderr or "Package biblatex Error" in result.stderr:
-                console.print("[bold red]Missing LaTeX packages detected.[/bold red]")
-                console.print("[bold yellow]Please install the required LaTeX packages:[/bold yellow]")
-                console.print("""
-For Ubuntu/Debian:
-```
-sudo apt-get update
-sudo apt-get install texlive-latex-base texlive-latex-extra texlive-latex-recommended texlive-publishers texlive-science texlive-bibtex-extra biber
-```
-
-For Arch Linux:
-```
-sudo pacman -S texlive-most
-```
-
-For Fedora:
-```
-sudo dnf install texlive-scheme-full
-```
-""")
-            else:
-                console.print("[bold yellow]You can edit the Markdown file manually and try again.[/bold yellow]")
+            console.print("[bold yellow]You can edit the Markdown file manually and try again.[/bold yellow]")
             return
         
         console.print(
