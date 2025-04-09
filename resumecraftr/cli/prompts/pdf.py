@@ -1,56 +1,81 @@
-MARKDOWN_PROMPT = r"""
-You are an expert at generating Markdown documents for ATS-friendly resumes. Your task is to generate a well-formatted Markdown file based on the provided CV text, optimized CV sections, and the job description.
+MARKDOWN_PROMPT = """You are an expert at generating Markdown documents for ATS-friendly resumes. Your task is to generate a well-formatted Markdown file based on the provided CV text, optimized CV sections, and the job description.
 
-IMPORTANT: DO NOT GENERATE LOREM IPSUM OR PLACEHOLDER TEXT. Use ONLY the actual content from the provided data.
+IMPORTANT: The output must be compatible with the EISVOGEL template for Pandoc. Follow these specific formatting rules:
 
-### Instructions:
-1. Use the provided **Markdown template** structure to generate the final document.
-2. Populate all sections using:
-   - **Original CV text**: Use it to recover missing details that may have been lost in optimization.
-   - **Optimized CV sections**: These are rewritten for ATS but may lack important details.
-   - **Job Description**: Ensure the resume aligns well with the job posting.
-3. **Prioritize and expand on relevant experience**:
-   - Highlight and **fully elaborate** on work experience that is directly related to the job description.
-   - Ensure that all key achievements, technologies used, and detailed responsibilities are included.
-   - Do not summarize key experiences; keep descriptions **as detailed as possible**.
-   - For non-relevant jobs, provide a shorter summary but still retain key points.
-4. Ensure the Markdown output is **properly structured**, with:
-   - Bullet points where appropriate (using `-` or `*`).
-   - Proper heading levels (using `#`, `##`, etc.).
-   - Proper text formatting to keep it **clean and professional**.
-5. Do **not** introduce information that does not exist in the original CV or optimized sections, but you may infer relevant details when appropriate.
-6. Maintain an **ATS-friendly format**, avoiding excessive styling while keeping it readable.
-7. Ensure the output is **pure Markdown code**, without code block wrappers (e.g., no triple backticks ` ``` `).
-8. Do not include explanations or metadata, only return the final Markdown document.
-9. **IMPORTANT - Language**: Generate the resume in the specified language ({language}). This means:
-   - All text must be in {language}
-   - Follow the conventions and formatting standards for resumes in {language}
-   - Use appropriate terminology and expressions for {language}
-   - Maintain proper grammar and style for {language}
-   - If translating from another language, ensure the translation is natural and idiomatic
-
+1. Use YAML front matter for metadata:
+```yaml
 ---
+title: Your Name
+author: Your Name
+date: \\today
+lang: {language}
+---
+```
 
-### Input Data:
-#### Markdown Template:
+2. Use specific heading levels:
+- # for the main title (your name)
+- ## for section titles (Experience, Education, etc.)
+- ### for subsection titles (job titles, degree names, etc.)
+
+3. Format lists and sections:
+- Use bullet points (-) for lists
+- Use bold (**) for important information
+- Use italic (*) for dates and locations
+- Use code blocks (```) for technical skills
+
+4. Structure the content:
 ```markdown
-{md_template}
+# Your Name
+*Your Title*
+
+## Contact Information
+- **Email:** your.email@example.com
+- **Phone:** (123) 456-7890
+- **Location:** City, Country
+- **LinkedIn:** [Your Name](https://linkedin.com/in/yourname)
+
+## Professional Summary
+Your professional summary here...
+
+## Experience
+### Job Title
+*Company Name | Location | Start Date - End Date*
+- Key achievement 1
+- Key achievement 2
+
+## Education
+### Degree Name
+*University Name | Location | Graduation Date*
+- Relevant coursework or achievements
+
+## Skills
+```python
+Technical Skills: Python, Java, SQL, etc.
+Soft Skills: Leadership, Communication, etc.
 ```
 
-#### Optimized CV Sections (JSON Format) (USE IT TO COMPLEMENT DATA AND FOLLOW INSTRUCTIONS):
-```json
-{optimized_sections}
+## Projects
+### Project Name
+*Technologies Used | Date*
+- Project description
+- Key contributions
+
+## Certifications
+- **Certification Name**, *Issuing Organization*, Date
 ```
 
-#### Job Description:
-```
+Now, using the following information, generate a properly formatted Markdown document:
+
+### Template Structure:
+{template}
+
+### CV Sections:
+{cv_sections}
+
+### Job Description:
 {job_description}
-```
-#### CUSTOM USER INPUT INSTRUCTIONS AND DATA
 
-```markdown
-{custom}
-```
-### Output:
-Provide **only** the final Markdown file content in {language}, properly formatted and ready for conversion to PDF using Pandoc. Do not include any explanations. Ensure the output is **pure Markdown code**, without code block wrappers (e.g., no triple backticks ` ``` `). Do not markdown code box, use RAW Markdown text
-"""
+### Tailored CV (if available):
+{tailored_cv}
+
+Generate ONLY the Markdown content, properly formatted for the EISVOGEL template. Do not include any explanations or additional text."""

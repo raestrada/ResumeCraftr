@@ -9,6 +9,8 @@ from rich.prompt import Prompt
 from rich.markdown import Markdown
 from resumecraftr.cli.agent import execute_prompt, create_or_get_agent
 from resumecraftr.cli.prompts.pdf import MARKDOWN_PROMPT
+import openai
+from datetime import datetime
 
 console = Console()
 CONFIG_FILE = "cv-workspace/resumecraftr.json"
@@ -186,58 +188,60 @@ After installation, retry running `resumecraftr export-pdf`! ✅
 
 @click.command()
 @click.option(
-    "--translate",
-    "-t",
-    help="Translate the resume to a different language (e.g., EN, ES). If not provided, uses the language from resumecraftr.json",
-)
-@click.option(
     "--skip-md-gen",
-    "-s",
     is_flag=True,
     help="Skip Markdown generation with OpenAI and use an existing Markdown file. Useful for debugging PDF generation issues.",
 )
-def export_pdf(translate, skip_md_gen):
-    """Export a PDF resume using Pandoc to convert from Markdown to PDF.
-    
-    By default, the resume will be generated in the language specified in resumecraftr.json.
-    Use the --translate option to generate the resume in a different language.
-    Use the --skip-md-gen option to skip OpenAI Markdown generation and use an existing file.
-    """
-    # Only create the agent when we're about to use OpenAI
-    if not skip_md_gen:
-        create_or_get_agent("ResumeCraftr Agent PDF gen")
-
+@click.option(
+    "--language",
+    type=str,
+    help="Language to generate the resume in (e.g., 'en', 'es'). Defaults to the language in resumecraftr.json.",
+)
+@click.option(
+    "--translate",
+    is_flag=True,
+    help="Generate the resume in a different language than the default.",
+)
+@click.option(
+    "--target-language",
+    type=str,
+    help="Target language for translation (e.g., 'en', 'es'). Required if --translate is used.",
+)
+def export_pdf(
+    skip_md_gen: bool = False,
+    language: str = None,
+    translate: bool = False,
+    target_language: str = None,
+):
+    """Export a PDF resume using Pandoc."""
     if not check_pandoc():
-        console.print("[bold red]Error: Pandoc is not installed.[/bold red]")
         print_pandoc_installation_guide()
         return
 
-    # Check for required LaTeX packages
-    missing_packages = check_latex_packages()
-    if missing_packages:
-        console.print(f"[bold red]Error: Missing required LaTeX packages: {', '.join(missing_packages)}[/bold red]")
-        print_latex_installation_guide(missing_packages)
-        return
-
-    # Ensure eisvogel template is available
-    if not ensure_eisvogel_template():
-        console.print("[bold red]Error: Failed to install eisvogel template.[/bold red]")
-        return
-
     # Load configuration
-    if not os.path.exists(CONFIG_FILE):
-        console.print(
-            "[bold red]Configuration file not found. Run 'resumecraftr setup' first.[/bold red]"
-        )
+    try:
+        with open(CONFIG_FILE, "r", encoding="utf-8") as f:
+            config = json.load(f)
+    except FileNotFoundError:
+        console.print("[bold red]Configuration file not found. Please run 'resumecraftr init' first.[/bold red]")
+        return
+    except json.JSONDecodeError:
+        console.print("[bold red]Invalid configuration file. Please run 'resumecraftr init' first.[/bold red]")
         return
 
-    with open(CONFIG_FILE, "r", encoding="utf-8") as f:
-        config = json.load(f)
+    # Determine language
+    if translate and target_language:
+        language = target_language
+    elif not language:
+        language = config.get("default_language", "en")
 
-    # Determine the language to use
-    language = translate if translate else config.get("primary_language", "EN")
     console.print(f"[bold blue]Generating resume in language: {language}[/bold blue]")
 
+    # Only create the agent when we're about to use OpenAI
+    if not skip_md_gen:
+        create_or_get_agent()
+
+    # Get the Markdown file to use
     if skip_md_gen:
         # Find existing Markdown files in the workspace that start with "openai-response"
         md_files = [f for f in os.listdir("cv-workspace") if f.endswith(".md") and f.startswith("openai-response")]
@@ -256,256 +260,154 @@ def export_pdf(translate, skip_md_gen):
             
         output_md_file = os.path.join("cv-workspace", md_file)
         console.print(f"[bold blue]Using OpenAI response file: {md_file}[/bold blue]")
-        
-        # Add language suffix to PDF filename
-        output_pdf_file = output_md_file.replace(".md", f"_{language.lower()}.pdf")
-
-        console.print(f"[bold cyan]Converting Markdown to PDF: {output_md_file}[/bold cyan]")
-
-        # Convert Markdown to PDF using Pandoc
-        try:
-            pandoc_cmd = [
-                "pandoc",
-                output_md_file,
-                "-o", output_pdf_file,
-                "--pdf-engine=xelatex",
-                "--template=eisvogel",
-                "--listings",
-                "--toc",
-                "--toc-depth=2",
-                "--number-sections",
-                "--highlight-style=tango",
-                "--variable", "colorlinks:true",
-                "--variable", "linkcolor:blue",
-                "--variable", "urlcolor:blue",
-                "--variable", "toccolor:blue",
-            ]
-            
-            result = subprocess.run(pandoc_cmd, check=False, capture_output=True, text=True)
-            
-            if result.returncode != 0:
-                console.print(f"[bold red]Error during PDF export:[/bold red]")
-                console.print(result.stderr)
-                
-                # Verificar si el error está relacionado con paquetes LaTeX faltantes
-                if "biblatex.sty not found" in result.stderr or "Package biblatex Error" in result.stderr:
-                    console.print("[bold red]Missing LaTeX packages detected.[/bold red]")
-                    console.print("[bold yellow]Please install the required LaTeX packages:[/bold yellow]")
-                    console.print("""
-For Ubuntu/Debian:
-```
-sudo apt-get update
-sudo apt-get install texlive-latex-base texlive-latex-extra texlive-latex-recommended texlive-publishers texlive-science texlive-bibtex-extra biber
-```
-
-For Arch Linux:
-```
-sudo pacman -S texlive-most
-```
-
-For Fedora:
-```
-sudo dnf install texlive-scheme-full
-```
-""")
-                else:
-                    console.print("[bold yellow]You can edit the Markdown file manually and try again.[/bold yellow]")
-                return
-            
-            console.print(
-                f"[bold green]PDF successfully exported: {output_pdf_file}[/bold green]"
-            )
-        except Exception as e:
-            console.print(f"[bold red]Error during PDF export: {e}[/bold red]")
-            console.print(
-                "[bold yellow]You can edit the Markdown file manually and try again.[/bold yellow]"
-            )
     else:
         # Normal flow - generate Markdown with OpenAI
-        with open(CUSTOM_PROMPT, "r", encoding="utf-8") as f:
-            custom_promt = f.readlines()
-
-        extracted_files = config.get("extracted_files", [])
-        if not extracted_files:
-            console.print(
-                "[bold red]No parsed CV sections found in configuration.[/bold red]"
-            )
-            return
-
-        extracted_files = [
-            f.replace(".txt", ".optimized_sections.json") for f in extracted_files
-        ]
-        sections_file = extracted_files[0]
-
-        if len(extracted_files) > 1:
-            sections_file = Prompt.ask(
-                "Multiple tailored CV files detected. Choose one", choices=extracted_files
-            )
-
-        sections_path = os.path.abspath(os.path.join("cv-workspace", sections_file))
-        if not os.path.exists(sections_path):
-            console.print(
-                f"[bold red]Selected tailored sections file '{sections_file}' does not exist.[/bold red]"
-            )
-            return
-
-        console.print(f"[bold blue]Exporting PDF using: {sections_file}[/bold blue]")
-
-        with open(sections_path, "r", encoding="utf-8") as f:
-            optimized_sections = json.load(f)
-
-        # Load Markdown template
-        if not os.path.exists(MD_TEMPLATE):
-            console.print(
-                f"[bold red]Markdown template '{MD_TEMPLATE}' not found.[/bold red]"
-            )
-            return
-
-        with open(MD_TEMPLATE, "r", encoding="utf-8") as f:
-            md_template = f.read()
-
-        # Load consolidated Markdown if it exists
-        consolidated_md = None
-        consolidated_md_path = os.path.join("cv-workspace", "Rodrigo Estrada CV EN.md")
-        if os.path.exists(consolidated_md_path):
-            with open(consolidated_md_path, "r", encoding="utf-8") as f:
-                consolidated_md = f.read()
-            console.print(f"[bold green]Found consolidated Markdown file: {consolidated_md_path}[/bold green]")
-
-        # Load extracted CV text
-        original_cv_text = ""
-        for txt_file in config.get("extracted_files", []):
-            txt_path = os.path.abspath(os.path.join("cv-workspace", txt_file))
-            if os.path.exists(txt_path):
-                with open(txt_path, "r", encoding="utf-8") as f:
-                    original_cv_text = f.read()
-                    break
-
-        # Load job description
-        job_desc_files = config.get("job_descriptions", [])
-        if not job_desc_files:
-            console.print(
-                "[bold red]No job descriptions found in configuration.[/bold red]"
-            )
-            return
-
-        job_desc_path = os.path.abspath(
-            os.path.join("cv-workspace", "job_descriptions", job_desc_files[0])
-        )
-        if not os.path.exists(job_desc_path):
-            console.print(
-                f"[bold red]Selected job description file '{job_desc_files[0]}' does not exist.[/bold red]"
-            )
-            return
-
-        with open(job_desc_path, "r", encoding="utf-8") as f:
-            job_description = f.read()
-
-        # Convert JSON to string for OpenAI
-        optimized_sections_text = json.dumps(
-            optimized_sections, indent=4, ensure_ascii=False
-        )
-
-        # Generate the prompt
-        prompt = f"""
-You are an expert at generating Markdown documents for ATS-friendly resumes. Your task is to generate a well-formatted Markdown file based on the provided CV text, optimized CV sections, and the job description.
-
-IMPORTANT: DO NOT GENERATE LOREM IPSUM OR PLACEHOLDER TEXT. Use ONLY the actual content from the provided data.
-
-### Instructions:
-1. Use the provided **Markdown template** structure to generate the final document.
-2. Use the **consolidated Markdown** as your primary source of content. This is the most up-to-date version of the CV.
-3. Use the **optimized CV sections** and **job description** to enhance and tailor the content, but maintain the structure and information from the consolidated Markdown.
-4. Ensure all sections from the consolidated Markdown are preserved.
-5. Do not introduce new information that doesn't exist in the provided data.
-6. Generate the resume in {language}.
-
-### Consolidated Markdown (USE THIS AS PRIMARY SOURCE):
-```markdown
-{consolidated_md if consolidated_md else "No consolidated Markdown available"}
-```
-
-### Optimized CV Sections (USE TO ENHANCE CONTENT):
-```json
-{optimized_sections_text}
-```
-
-### Job Description (USE FOR TAILORING):
-```
-{job_description}
-```
-
-### Output:
-Provide ONLY the final Markdown file content in {language}, properly formatted and ready for conversion to PDF using Pandoc. Do not include any explanations or code blocks.
-"""
-
-        # Generate Markdown with OpenAI
-        console.print("[bold cyan]Generating Markdown content with OpenAI...[/bold cyan]")
-        markdown_content = execute_prompt(prompt, "ResumeCraftr Agent PDF gen")
-
-        if not markdown_content.strip():
-            console.print(
-                "[bold red]Error: OpenAI did not return a valid Markdown document.[/bold red]"
-            )
-            return
-
-        # Save the OpenAI response to a file with timestamp
-        timestamp = time.strftime("%Y%m%d-%H%M%S")
-        openai_response_file = os.path.join("cv-workspace", f"openai-response-{timestamp}.md")
-        with open(openai_response_file, "w", encoding="utf-8") as f:
-            f.write(markdown_content)
-        console.print(f"[bold yellow]OpenAI response saved to: {openai_response_file}[/bold yellow]")
-
-        # Save the Markdown file
-        with open(output_md_file, "w", encoding="utf-8") as f:
-            f.write(markdown_content)
-            
-        console.print(f"[bold green]Markdown content saved to: {output_md_file}[/bold green]")
-
-        # Add language suffix to PDF filename
-        output_pdf_file = output_md_file.replace(".md", f"_{language.lower()}.pdf")
-
-        console.print(f"[bold cyan]Converting Markdown to PDF: {output_md_file}[/bold cyan]")
-
-        # Convert Markdown to PDF using Pandoc
+        # Load the Markdown template
         try:
-            # Create a temporary file with the exact content we want to convert
-            temp_md_file = os.path.join("cv-workspace", "temp_for_pandoc.md")
-            with open(temp_md_file, "w", encoding="utf-8") as f:
+            with open(MD_TEMPLATE, "r", encoding="utf-8") as f:
+                template = f.read()
+        except FileNotFoundError:
+            console.print("[bold red]Markdown template not found.[/bold red]")
+            return
+
+        # Load the parsed CV sections
+        try:
+            # Find all optimized sections files
+            sections_files = [f for f in os.listdir("cv-workspace") if f.endswith(".optimized_sections.json")]
+            
+            if not sections_files:
+                console.print("[bold red]No optimized CV sections files found. Please run 'resumecraftr tailor-cv' first.[/bold red]")
+                return
+                
+            if len(sections_files) > 1:
+                # Let user choose which sections file to use
+                sections_file = Prompt.ask(
+                    "Multiple optimized CV files detected. Choose one", choices=sections_files
+                )
+            else:
+                sections_file = sections_files[0]
+                
+            with open(f"cv-workspace/{sections_file}", "r", encoding="utf-8") as f:
+                cv_sections = json.load(f)
+        except FileNotFoundError:
+            console.print("[bold red]Selected CV sections file not found.[/bold red]")
+            return
+        except json.JSONDecodeError:
+            console.print("[bold red]Invalid CV sections file.[/bold red]")
+            return
+
+        # Load the job description
+        try:
+            # Find all job description files
+            job_files = [f for f in os.listdir("cv-workspace/job_descriptions") if f.endswith(".txt")]
+            
+            if not job_files:
+                console.print("[bold red]No job description files found. Please run 'resumecraftr add-job' first.[/bold red]")
+                return
+                
+            if len(job_files) > 1:
+                # Let user choose which job description to use
+                job_file = Prompt.ask(
+                    "Multiple job descriptions detected. Choose one", choices=job_files
+                )
+            else:
+                job_file = job_files[0]
+                
+            with open(f"cv-workspace/job_descriptions/{job_file}", "r", encoding="utf-8") as f:
+                job_description = f.read()
+        except FileNotFoundError:
+            console.print("[bold red]Selected job description file not found.[/bold red]")
+            return
+
+        # Load the tailored CV if it exists
+        tailored_cv_path = "cv-workspace/tailored/tailored_cv.json"
+        if os.path.exists(tailored_cv_path):
+            try:
+                with open(tailored_cv_path, "r", encoding="utf-8") as f:
+                    tailored_cv = json.load(f)
+            except json.JSONDecodeError:
+                console.print("[bold red]Invalid tailored CV file.[/bold red]")
+                return
+        else:
+            tailored_cv = None
+
+        # Prepare the prompt
+        prompt = MARKDOWN_PROMPT.format(
+            template=template,
+            cv_sections=json.dumps(cv_sections, indent=2),
+            job_description=job_description,
+            tailored_cv=json.dumps(tailored_cv, indent=2) if tailored_cv else "None",
+            language=language,
+        )
+
+        # Generate the Markdown content
+        try:
+            # Generate Markdown with the agent
+            markdown_content = execute_prompt(prompt)
+            
+            if not markdown_content.strip():
+                console.print("[bold red]Error: OpenAI did not return a valid Markdown document.[/bold red]")
+                return
+
+            # Save the OpenAI response
+            output_md_file = os.path.join(
+                "cv-workspace",
+                f"openai-response-{datetime.now().strftime('%Y%m%d-%H%M%S')}.md",
+            )
+            with open(output_md_file, "w", encoding="utf-8") as f:
                 f.write(markdown_content)
-                
-            pandoc_cmd = [
-                "pandoc",
-                temp_md_file,  # Use the temporary file instead of output_md_file
-                "-o", output_pdf_file,
-                "--pdf-engine=xelatex",
-                "--template=eisvogel",
-                "--listings",
-                "--toc",
-                "--toc-depth=2",
-                "--number-sections",
-                "--highlight-style=tango",
-                "--variable", "colorlinks:true",
-                "--variable", "linkcolor:blue",
-                "--variable", "urlcolor:blue",
-                "--variable", "toccolor:blue",
-            ]
+            console.print(f"[bold green]Markdown content saved to: {output_md_file}[/bold green]")
+        except Exception as e:
+            console.print(f"[bold red]Error generating Markdown content: {e}[/bold red]")
+            return
+
+    # Get the base name of the sections file for the PDF output
+    sections_base_name = os.path.splitext(sections_file)[0].replace("_optimized_sections", "")
+    output_pdf_file = os.path.join("cv-workspace", f"{sections_base_name}_{language.lower()}.pdf")
+
+    console.print(f"[bold cyan]Converting Markdown to PDF: {output_md_file}[/bold cyan]")
+
+    # Convert Markdown to PDF using Pandoc
+    try:
+        pandoc_cmd = [
+            "pandoc",
+            output_md_file,
+            "-o", output_pdf_file,
+            "--pdf-engine=xelatex",
+            "--template=eisvogel",
+            "--listings",
+            "--toc",
+            "--toc-depth=2",
+            "--number-sections",
+            "--highlight-style=tango",
+            "--variable", "colorlinks:true",
+            "--variable", "linkcolor:blue",
+            "--variable", "urlcolor:blue",
+            "--variable", "toccolor:blue",
+            "--variable", "documentclass=article",
+            "--variable", "mainfont=DejaVu Sans",
+            "--variable", "sansfont=DejaVu Sans",
+            "--variable", "monofont=DejaVu Sans Mono",
+            "--variable", "fontsize=11pt",
+            "--variable", "geometry=margin=2.5cm",
+            "--variable", "linestretch=1.25",
+            "--variable", "header-includes=\\usepackage[utf8]{inputenc}\\usepackage[T1]{fontenc}\\usepackage{hyperref}\\usepackage{listings}\\usepackage{xcolor}",
+            "--standalone",
+            "--from", "markdown+yaml_metadata_block",
+            "--to", "latex",
+        ]
+        
+        result = subprocess.run(pandoc_cmd, check=False, capture_output=True, text=True)
+        
+        if result.returncode != 0:
+            console.print(f"[bold red]Error during PDF export:[/bold red]")
+            console.print(result.stderr)
             
-            result = subprocess.run(pandoc_cmd, check=False, capture_output=True, text=True)
-            
-            # Clean up the temporary file
-            if os.path.exists(temp_md_file):
-                os.remove(temp_md_file)
-            
-            if result.returncode != 0:
-                console.print(f"[bold red]Error during PDF export:[/bold red]")
-                console.print(result.stderr)
-                
-                # Verificar si el error está relacionado con paquetes LaTeX faltantes
-                if "biblatex.sty not found" in result.stderr or "Package biblatex Error" in result.stderr:
-                    console.print("[bold red]Missing LaTeX packages detected.[/bold red]")
-                    console.print("[bold yellow]Please install the required LaTeX packages:[/bold yellow]")
-                    console.print("""
+            # Verificar si el error está relacionado con paquetes LaTeX faltantes
+            if "biblatex.sty not found" in result.stderr or "Package biblatex Error" in result.stderr:
+                console.print("[bold red]Missing LaTeX packages detected.[/bold red]")
+                console.print("[bold yellow]Please install the required LaTeX packages:[/bold yellow]")
+                console.print("""
 For Ubuntu/Debian:
 ```
 sudo apt-get update
@@ -522,18 +424,18 @@ For Fedora:
 sudo dnf install texlive-scheme-full
 ```
 """)
-                else:
-                    console.print("[bold yellow]You can edit the Markdown file manually and try again.[/bold yellow]")
-                return
-            
-            console.print(
-                f"[bold green]PDF successfully exported: {output_pdf_file}[/bold green]"
-            )
-        except Exception as e:
-            console.print(f"[bold red]Error during PDF export: {e}[/bold red]")
-            console.print(
-                "[bold yellow]You can edit the Markdown file manually and try again.[/bold yellow]"
-            )
+            else:
+                console.print("[bold yellow]You can edit the Markdown file manually and try again.[/bold yellow]")
+            return
+        
+        console.print(
+            f"[bold green]PDF successfully exported: {output_pdf_file}[/bold green]"
+        )
+    except Exception as e:
+        console.print(f"[bold red]Error during PDF export: {e}[/bold red]")
+        console.print(
+            "[bold yellow]You can edit the Markdown file manually and try again.[/bold yellow]"
+        )
 
 if __name__ == "__main__":
     export_pdf() 
