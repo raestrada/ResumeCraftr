@@ -1,7 +1,8 @@
-import click
-import os
 import json
-import PyPDF2
+import os
+
+import click
+import fitz
 from rich.console import Console
 from rich.progress import Progress
 
@@ -29,20 +30,17 @@ def import_cv(pdf_path):
 
     console.print(f"[bold green]Importing CV from:[/bold green] {pdf_path}")
 
-    with open(pdf_path, "rb") as pdf_file, open(
+    with fitz.open(pdf_path) as document, open(
         output_filename, "w", encoding="utf-8"
     ) as text_file:
-        reader = PyPDF2.PdfReader(pdf_file)
-
         with Progress() as progress:
             task = progress.add_task(
-                "[cyan]Processing pages...", total=len(reader.pages)
+                "[cyan]Processing pages...", total=document.page_count
             )
-
-            for page in reader.pages:
-                text = page.extract_text()
+            for page in document:
+                text = page.get_text("text")
                 if text:
-                    text_file.write(text + "\n")
+                    text_file.write(text.strip() + "\n")
                 progress.update(task, advance=1)
 
     console.print(

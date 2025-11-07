@@ -105,35 +105,127 @@ fi
 # Generar custom.md
 generate_custom
 
+cleanup_seed_files() {
+    rm -f "cv-workspace/dummy_Software Engineer Resume.extracted_sections.json"
+    rm -f "cv-workspace/dummy_Software Engineer Resume.txt"
+    rm -f "cv-workspace/dummy_Software Engineer Resume.optimized_sections.json"
+    rm -f "cv-workspace/dummy_Software Engineer Resume.tailored_sections.json"
+}
+
+populate_cv_sections() {
+    local marker="populate_cv_sections"
+    if check_command "$marker"; then
+        echo -e "${YELLOW}Skipping CV population, already done.${NC}"
+        return 0
+    fi
+
+    python - <<'PY'
+import json
+from pathlib import Path
+
+cv_path = Path("cv-workspace") / "dummy_Software Engineer Resume.extracted_sections.json"
+data = {
+    "Contact Information": {
+        "Full Name": "Ariana Delgado",
+        "Email": "ariana.delgado@example.com",
+        "Phone Number": "+1-415-555-2109",
+        "LinkedIn": "linkedin.com/in/arianadelgado",
+        "GitHub": "github.com/adelgado",
+        "Portfolio": "arianadelgado.dev"
+    },
+    "Summary": {
+        "Summary": "Principal engineer with 12+ years building AI productivity platforms, large-scale data fabrics, and developer tooling that ship tangible revenue results."
+    },
+    "Technical Skills": {
+        "Programming Languages": ["Python", "TypeScript", "Go", "Rust"],
+        "Tools and Technologies": ["LangChain", "LangGraph", "FastAPI", "Kafka", "Airflow", "Snowflake", "Kubernetes", "Terraform"]
+    },
+    "Work Experience": [
+        {
+            "Job Title": "Principal Software Engineer",
+            "Company": "AtlasPay",
+            "Dates of Employment": "2021-Present",
+            "Responsibilities": [
+                "Migrated payment core to event-driven architecture processing 80M tx/month with <200ms latency",
+                "Launched ML anomaly detection reducing chargeback losses by 34%",
+                "Mentored 9 engineers and formalized technical ladder + reliability guild"
+            ]
+        },
+        {
+            "Job Title": "Senior Staff Engineer",
+            "Company": "Lumina Analytics",
+            "Dates of Employment": "2017-2021",
+            "Responsibilities": [
+                "Designed multi-cloud data lake (>5PB) and governance program",
+                "Led rollout of LangChain copilots cutting research cycles 45%",
+                "Drove incident command practice sustaining 99.97% SLO"
+            ]
+        },
+        {
+            "Job Title": "Lead Full-Stack Engineer",
+            "Company": "Northwind Labs",
+            "Dates of Employment": "2014-2017",
+            "Responsibilities": [
+                "Delivered React/GraphQL workflow suite adopted by 300 enterprise customers",
+                "Implemented GitOps + contract testing reducing regressions 60%"
+            ]
+        }
+    ],
+    "Education": [
+        {
+            "Institution": "Georgia Institute of Technology",
+            "Degree": "M.S. Computer Science",
+            "Year": "2013"
+        },
+        {
+            "Institution": "Universidad de Los Andes",
+            "Degree": "B.Eng. Computer Engineering",
+            "Year": "2011"
+        }
+    ],
+    "Projects": [
+        {
+            "Project Name": "Autonomous Candidate Screener",
+            "Description": "LangGraph + Chroma hiring copilot with DeepSeek + policy guardrails",
+            "Technologies Used": ["LangChain", "ChromaDB", "FastAPI", "DeepSeek"]
+        },
+        {
+            "Project Name": "Observability Mesh",
+            "Description": "OpenTelemetry enrichment service powering 10B spans/day",
+            "Technologies Used": ["OpenTelemetry", "ClickHouse", "Rust", "Kubernetes"]
+        }
+    ]
+}
+
+cv_path.write_text(json.dumps(data, indent=2), encoding="utf-8")
+PY
+
+    if [ $? -eq 0 ]; then
+        mark_command "$marker"
+        echo -e "${GREEN}Seed CV data written successfully${NC}"
+    else
+        echo -e "${RED}Failed to populate CV data${NC}"
+        exit 1
+    fi
+}
+
 # Inicializar el proyecto
-run_command 'setup --language "EN" --gpt-model "gpt-4o"' || exit 1
+run_command 'setup --language "EN" --provider "openrouter" --model "deepseek/deepseek-chat"' || exit 1
 
 # 1. Crear un nuevo CV
+cleanup_seed_files
 run_command 'new-cv "Software Engineer Resume"' || exit 1
+populate_cv_sections
 
-# 2. Añadir secciones al CV
-run_command 'add-section "Professional Summary" "Experienced software engineer with expertise in full-stack development, cloud architecture, and agile methodologies. Proven track record of delivering scalable solutions and leading development teams."' || exit 1
-run_command 'add-section "Experience" "Senior Software Engineer at TechCorp (2020-Present)\n- Led development of microservices architecture reducing system latency by 40%\n- Managed a team of 5 developers implementing CI/CD pipeline\n- Implemented automated testing increasing code coverage to 95%"' || exit 1
-run_command 'add-section "Education" "Master of Science in Computer Science, Stanford University (2018)\nBachelor of Science in Software Engineering, MIT (2016)"' || exit 1
-run_command 'add-section "Skills" "Programming: Python, JavaScript, Java, C#\nFrameworks: React, Node.js, Django, Spring Boot\nCloud: AWS, Azure, GCP\nDevOps: Docker, Kubernetes, Jenkins\nDatabases: PostgreSQL, MongoDB, Redis"' || exit 1
-run_command 'add-section "Projects" "E-commerce Platform (2021)\n- Developed full-stack application using React and Node.js\n- Implemented payment processing with Stripe API\n- Deployed on AWS with auto-scaling configuration\n\nMobile App (2020)\n- Created cross-platform app using React Native\n- Integrated with RESTful APIs for real-time data\n- Published on both App Store and Google Play"' || exit 1
-
-# 3. Importar CV desde archivo
-run_command 'import-cv cv-workspace/software_engineer_resume.pdf' || exit 1
-
-# 4. Parsear CV importado
-run_command 'parse-cv cv-workspace/software_engineer_resume.txt' || exit 1
+# 2. CV seed data already populated via JSON helper
 
 # 5. Añadir descripción de trabajo
-run_command 'add-job "Senior Full-Stack Developer Position at TechInnovate" "We are looking for a Senior Full-Stack Developer to join our growing team. The ideal candidate will have 5+ years of experience in web development, strong knowledge of JavaScript frameworks, and experience with cloud platforms. Responsibilities include developing and maintaining web applications, collaborating with cross-functional teams, and mentoring junior developers."' || exit 1
+run_command 'add-job "Director of AI Platforms at Strataverse" --content "Strataverse is seeking a Director-level engineer to lead our AI Productivity Platform. You will guide a team of 12 building LangChain/LangGraph powered RAG services, integrate DeepSeek + OpenRouter providers, and evolve our multi-region Kubernetes footprint. Required: 10+ years in backend/ML systems, proven leadership of staff-level engineers, fluency with Python, Go, and modern data tooling, hands-on experience productionizing LLM workflows, and obsession with measurable business impact."' || exit 1
 
 # 6. Adaptar CV a la descripción del trabajo
-run_command 'tailor-cv cv-workspace/software_engineer_resume.optimized_sections.json' || exit 1
+run_command 'tailor-cv' || exit 1
 
 # 7. Exportar CV a PDF
 run_command 'export-pdf' || exit 1
-
-# 8. Exportar CV a PDF en español
-run_command 'export-pdf --translate ES' || exit 1
 
 echo -e "${GREEN}Example usage for ResumeCraftr completed successfully${NC}" 

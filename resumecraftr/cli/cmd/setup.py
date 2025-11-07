@@ -1,108 +1,91 @@
-import os
 import json
-import shutil
-import importlib.resources
+import os
+from pathlib import Path
+
 import click
 from rich.console import Console
 
 console = Console()
 
-CONFIG_FILE = os.path.join("cv-workspace", "resumecraftr.json")
-CUSTOM_FILE = os.path.join("cv-workspace", "custom.md")
+WORKSPACE = Path("cv-workspace")
+CONFIG_FILE = WORKSPACE / "resumecraftr.json"
+CUSTOM_FILE = WORKSPACE / "custom.md"
 
-try:
-    with importlib.resources.path(
-        "resumecraftr.templates", "resume_template.md"
-    ) as md_template_path:
-        MD_TEMPLATE_SRC = str(md_template_path)
-except ModuleNotFoundError:
-    console.print(
-        "[bold red]Error: Could not locate the template file inside the installed package.[/bold red]"
-    )
-    MD_TEMPLATE_SRC = None
-
-try:
-    with importlib.resources.path(
-        "resumecraftr.templates", "eisvogel.latex"
-    ) as eisvogel_template_path:
-        EISVOGEL_TEMPLATE_SRC = str(eisvogel_template_path)
-except ModuleNotFoundError:
-    console.print(
-        "[bold red]Error: Could not locate the eisvogel template file inside the installed package.[/bold red]"
-    )
-    EISVOGEL_TEMPLATE_SRC = None
-
-MD_TEMPLATE_DEST = os.path.join("cv-workspace", "resume_template.md")
-PANDOC_TEMPLATES_DIR = os.path.expanduser("~/.local/share/pandoc/templates")
-EISVOGEL_TEMPLATE_DEST = os.path.join(PANDOC_TEMPLATES_DIR, "eisvogel.latex")
-
-DEFAULT_CONFIG = {
-    "primary_language": "EN",
-    "output_format": "pdf",
-    "template_name": "resume_template.md",
-}
 
 @click.command()
+@click.option("--language", default="EN", show_default=True, help="Primary language for your resumes")
 @click.option(
-    "--language", default="EN", show_default=True, help="Language of the CV (EN or ES)"
+    "--provider",
+    default="openrouter",
+    type=click.Choice(["openai", "openrouter", "ollama"], case_sensitive=False),
+    show_default=True,
+    help="LLM provider to use through LangChain",
 )
 @click.option(
-    "--gpt-model", default="gpt-4o", show_default=True, help="chatGPT Model"
+    "--model",
+    default="deepseek/deepseek-chat",
+    show_default=True,
+    help="Model name that matches the selected provider",
 )
-def setup(language, gpt_model):
-    """Initialize a new ResumeCraftr workspace."""
-    # Create workspace directory
-    os.makedirs("cv-workspace", exist_ok=True)
+@click.option("--temperature", default=0.4, show_default=True, help="Generation temperature")
+def setup(language: str, provider: str, model: str, temperature: float) -> None:
+    """Initialize a fully Python-native ResumeCraftr workspace."""
 
-    # Create or update config file
-    config = DEFAULT_CONFIG.copy()
-    config["primary_language"] = language
-    config["chat_gpt"] = {
-        "model": gpt_model,
-        "temperature": 0.7,
-        "top_p": 1.0,
+    WORKSPACE.mkdir(exist_ok=True)
+    (WORKSPACE / "job_descriptions").mkdir(exist_ok=True)
+    (WORKSPACE / "output").mkdir(exist_ok=True)
+    (WORKSPACE / "templates" / "pdf").mkdir(parents=True, exist_ok=True)
+
+    config = {
+        "primary_language": language,
+        "llm": {
+            "provider": provider.lower(),
+            "model": model,
+            "temperature": temperature,
+            "max_tokens": 1200,
+        },
+        "retrieval": {
+            "persist_directory": ".chroma",
+            "embedding_provider": "huggingface",
+            "embedding_model": "sentence-transformers/all-MiniLM-L6-v2",
+            "chunk_size": 900,
+            "chunk_overlap": 200,
+        },
+        "pdf": {
+            "font": "helv",
+            "heading_font_size": 14,
+            "body_font_size": 11,
+            "margin": 54,
+        },
     }
 
-    with open(CONFIG_FILE, "w", encoding="utf-8") as f:
-        json.dump(config, f, indent=4)
+    with CONFIG_FILE.open("w", encoding="utf-8") as fh:
+        json.dump(config, fh, indent=4)
 
-    console.print(f"[bold green]Configuration file created:[/bold green] {CONFIG_FILE}")
+    if not CUSTOM_FILE.exists():
+        CUSTOM_FILE.write_text("# Custom instructions\n", encoding="utf-8")
 
-    # Create custom.md if it doesn't exist
-    if not os.path.exists(CUSTOM_FILE):
-        with open(CUSTOM_FILE, "w", encoding="utf-8") as f:
-            f.write("# Custom Instructions and Data\n\n")
-        console.print(f"[bold green]Custom file created:[/bold green] {CUSTOM_FILE}")
+    _copy_default_template()
 
-    # Copy Markdown template if it doesn't exist
-    if os.path.exists(MD_TEMPLATE_SRC) and not os.path.exists(MD_TEMPLATE_DEST):
-        shutil.copy(MD_TEMPLATE_SRC, MD_TEMPLATE_DEST)
-        console.print(f"[bold green]Markdown template copied to:[/bold green] {MD_TEMPLATE_DEST}")
-    elif not os.path.exists(MD_TEMPLATE_SRC):
+    console.print(f"[bold green]Workspace ready at {WORKSPACE.resolve()}[/bold green]")
+    console.print("[bold green]Configuration saved with LangChain defaults.[/bold green]")
+
+
+def _copy_default_template() -> None:
+    from importlib import resources
+
+    destination = WORKSPACE / "templates" / "pdf" / "modern.html"
+    if destination.exists():
+        return
+
+    try:
+        source = resources.files("resumecraftr.pdf.templates").joinpath("modern.html")
+        data = source.read_text(encoding="utf-8")
+        destination.write_text(data, encoding="utf-8")
         console.print(
-            f"[bold red]Markdown template source not found at:[/bold red] {MD_TEMPLATE_SRC}"
+            f"[bold green]Copied default template to {destination.relative_to(WORKSPACE)}[/bold green]"
         )
-    else:
+    except FileNotFoundError:
         console.print(
-            f"[bold yellow]Markdown template already exists in workspace:[/bold yellow] {MD_TEMPLATE_DEST}"
+            "[bold yellow]Warning: could not find bundled modern.html template.[/bold yellow]"
         )
-    
-    # Install eisvogel template for Pandoc
-    if os.path.exists(EISVOGEL_TEMPLATE_SRC):
-        # Create pandoc templates directory if it doesn't exist
-        os.makedirs(PANDOC_TEMPLATES_DIR, exist_ok=True)
-        
-        # Copy eisvogel template if it doesn't exist
-        if not os.path.exists(EISVOGEL_TEMPLATE_DEST):
-            shutil.copy(EISVOGEL_TEMPLATE_SRC, EISVOGEL_TEMPLATE_DEST)
-            console.print(f"[bold green]Eisvogel template installed for Pandoc:[/bold green] {EISVOGEL_TEMPLATE_DEST}")
-        else:
-            console.print(
-                f"[bold yellow]Eisvogel template already installed for Pandoc:[/bold yellow] {EISVOGEL_TEMPLATE_DEST}"
-            )
-    else:
-        console.print(
-            f"[bold red]Eisvogel template source not found at:[/bold red] {EISVOGEL_TEMPLATE_SRC}"
-        )
-
-    console.print("[bold green]Workspace initialized successfully![/bold green]") 

@@ -1,6 +1,6 @@
 # Getting Started with ResumeCraftr
 
-ResumeCraftr is an ATS-focused minimalist CV generator that leverages OpenAI and Pandoc to parse, optimize, and format resumes. This guide will walk you through the setup and usage of ResumeCraftr, along with tips for customizing your experience.
+ResumeCraftr is an ATS-focused minimalist CV generator that now leverages LangChain graph pipelines, an embedded ChromaDB store, and PyMuPDF to parse, optimize, and format resumes using only Python-native tooling. This guide walks you through the modernized setup and usage of ResumeCraftr, along with tips for customizing your experience.
 
 ---
 
@@ -14,9 +14,9 @@ ResumeCraftr now fully supports Windows, making it easier for more users to opti
 
 ResumeCraftr now allows you to create and manage CV sections interactively without needing to parse an existing CV. This makes it easier to build your resume from scratch or update specific sections.
 
-### 🌟 Improved PDF Generation! 📄
+### 🌟 Embedded RAG & PyMuPDF! 📄
 
-ResumeCraftr now uses Pandoc to convert Markdown to PDF, making the process more robust and less prone to errors. This also makes it easier to preview and edit your resume before generating the final PDF.
+ResumeCraftr now routes every LLM call through LangChain/ LangGraph, persists knowledge in an on-disk ChromaDB (SQLite) store, and renders PDFs directly through PyMuPDF for precise styling.
 
 ---
 
@@ -25,45 +25,31 @@ ResumeCraftr now uses Pandoc to convert Markdown to PDF, making the process more
 Ensure you have `pipx` installed, then install ResumeCraftr with:
 
 ```bash
-pipx install git+https://github.com/raestrada/ResumeCraftr.git@v0.4.0
+pipx install git+https://github.com/raestrada/ResumeCraftr.git@v0.5.0-beta1
 ```
 
-Additionally, make sure you have Pandoc installed:
+PyMuPDF ships with the project, so there is no longer a dependency on Pandoc or LaTeX. You only need:
 
-### 🟢 Windows
-1. Download and install [Pandoc](https://pandoc.org/installing.html).
-2. Ensure `pandoc` is in your system's PATH by running:
-   ```
-   pandoc --version
-   ```
-   If not, restart your computer or manually add the Pandoc directory to your PATH.
+- Python 3.10+ (3.11 recommended)
+- The appropriate API keys in your environment (`OPENAI_API_KEY`, `OPENROUTER_API_KEY`, or local Ollama)
+- Basic shell access to export your provider credentials before running the CLI
 
-### 🍏 macOS
-1. Install Pandoc via Homebrew:
-   ```
-   brew install pandoc
-   ```
-2. Verify the installation:
-   ```
-   pandoc --version
-   ```
+### Configuring provider API keys
 
-### 🐧 Linux
-For Debian/Ubuntu:
-   ```
-   sudo apt update && sudo apt install pandoc
-   sudo apt-get install texlive-latex-base texlive-latex-extra texlive-latex-recommended texlive-publishers texlive-science texlive-bibtex-extra biber
-   ```
-For Arch Linux:
-   ```
-   sudo pacman -S pandoc
-   sudo pacman -S texlive-most
-   ```
-For Fedora:
-   ```
-   sudo dnf install pandoc
-   sudo dnf install texlive-scheme-full
-   ```
+All providers are resolved via LangChain, so credentials live in standard environment variables:
+
+```bash
+# OpenRouter (recommended for multi-model routing)
+export OPENROUTER_API_KEY="sk-or-v1..."
+
+# OpenAI (only if you selected --provider openai)
+export OPENAI_API_KEY="sk-proj-..."
+
+# Optional: override LangChain's base URL for OpenRouter (only needed if you use custom routing)
+export OPENAI_BASE_URL="https://openrouter.ai/api/v1"
+```
+
+Prefer not to export environment variables? Create `~/.resumecraftr/openrouter_api_key.txt` and paste your OpenRouter key inside—ResumeCraftr will load it from that file first and fall back to the env vars. On Windows PowerShell, use `$env:OPENROUTER_API_KEY = "sk-or-v1..."`. Storing secrets in a `.env` file also works because the CLI loads dotenv automatically at startup.
 
 ---
 
@@ -72,17 +58,19 @@ For Fedora:
 ResumeCraftr operates within a dedicated workspace directory called `cv-workspace`. To set up this workspace, run:
 
 ```bash
-resumecraftr setup --language EN --gpt-model gpt-4o-mini
+resumecraftr setup --language EN --provider openrouter --model deepseek/deepseek-chat
 ```
 
 ### Key Options:
 - `--language`: Sets the primary language of your CV (e.g., `EN` for English or `ES` for Spanish).
-- `--gpt-model`: Specifies the GPT model to use. For testing, we recommend using `gpt-4o-mini`.
+- `--provider`: Selects the LangChain provider (`openai`, `openrouter`, or `ollama`).
+- `--model`: Specifies the model string compatible with the chosen provider (defaults to `deepseek/deepseek-chat`).
+- `--temperature`: Controls the creativity of generations (default `0.4`).
 
-This will create the `cv-workspace` directory with the following files:
-- **`cv-workspace/resume_template.md`**: The Markdown template used for PDF generation. You can modify this file to customize the CV layout and style.
-- **`cv-workspace/resumecraftr.json`**: The main configuration file.
-- **`cv-workspace/custom.md`**: A file for adding supplementary information and custom instructions for ChatGPT.
+This will create the `cv-workspace` directory with:
+- **`cv-workspace/resumecraftr.json`**: The main configuration file (see below).
+- **`cv-workspace/custom.md`**: A file for supplementary information and custom instructions.
+- **`cv-workspace/job_descriptions/`** and **`cv-workspace/output/`** directories.
 
 ---
 
@@ -92,16 +80,28 @@ Here's an example of a `resumecraftr.json` configuration file:
 
 ```json
 {
-    "primary_language": "ES",
-    "output_format": "pdf",
-    "template_name": "resume_template.md",
-    "chat_gpt": {
-        "model": "gpt-4o-mini",
-        "temperature": 0.7,
-        "top_p": 1.0
+    "primary_language": "EN",
+    "llm": {
+        "provider": "openrouter",
+        "model": "deepseek/deepseek-chat",
+        "temperature": 0.4,
+        "max_tokens": 1200
+    },
+    "retrieval": {
+        "persist_directory": ".chroma",
+        "embedding_provider": "huggingface",
+        "embedding_model": "sentence-transformers/all-MiniLM-L6-v2",
+        "chunk_size": 900,
+        "chunk_overlap": 200
+    },
+    "pdf": {
+        "font": "helv",
+        "heading_font_size": 14,
+        "body_font_size": 11,
+        "margin": 54
     },
     "extracted_files": [
-        "Rodrigo Estrada CV ES.txt"
+        "Rodrigo Estrada CV EN.txt"
     ],
     "job_descriptions": [
         "Principal Engineer Verne.txt"
@@ -109,12 +109,10 @@ Here's an example of a `resumecraftr.json` configuration file:
 }
 ```
 
-- **`primary_language`**: The language of the CV and job descriptions (e.g., `EN`, `ES`).
-- **`output_format`**: Output format, typically `pdf`.
-- **`template_name`**: Name of the Markdown template used for PDF generation.
-- **`chat_gpt`**: OpenAI settings such as the model, temperature, and top_p.
-- **`extracted_files`**: List of extracted text files from your CVs.
-- **`job_descriptions`**: List of job description files used for optimization.
+- **`llm`**: LangChain provider/model/temperature/max tokens used for all generations.
+- **`retrieval`**: Embedded ChromaDB settings plus embedding model/provider.
+- **`pdf`**: Styling knobs consumed by the PyMuPDF renderer.
+- **`extracted_files`** & **`job_descriptions`**: Workspace bookkeeping for imported resumes and stored jobs.
 
 ---
 
@@ -221,7 +219,7 @@ After adding the job description, tailor the resume with:
 resumecraftr tailor-cv
 ```
 
-This step ensures that your resume highlights relevant skills and experience based on the job description. ResumeCraftr uses OpenAI to rewrite and structure the content to be ATS-friendly.
+This step ensures that your resume highlights relevant skills and experience based on the job description. ResumeCraftr now routes the optimization through a LangChain + LangGraph pipeline backed by ChromaDB retrieval, so every section is grounded in your workspace knowledge base.
 
 ### Language Optimization
 
@@ -238,40 +236,40 @@ For example, if you configured ResumeCraftr with `--language ES` (Spanish), the 
 
 ## Exporting Your Resume to PDF
 
-Once you're satisfied with your resume, you can export it to PDF using:
+Once you're satisfied with your resume, you can export it to PDF using PyMuPDF:
 
 ```bash
+# Use the default (latest) tailored sections and bundled template
 resumecraftr export-pdf
-```
 
-By default, the resume will be generated in the language specified in your `resumecraftr.json` file (set during the `setup` command). If you want to generate the resume in a different language, use the `--translate` option:
-
-```bash
-resumecraftr export-pdf --translate EN  # Generate in English
-resumecraftr export-pdf --translate ES  # Generate in Spanish
+# Specify sections file, template, and destination
+resumecraftr export-pdf \
+  --sections senior-role.tailored_sections.json \
+  --template modern \
+  --output output/senior-role.pdf
 ```
 
 The command will:
-1. Find all `.extracted_sections.json` files in your workspace
-2. Let you choose which one to use if multiple files exist
-3. Generate a Markdown file and convert it to PDF using Pandoc
-4. Save the resulting PDF in your workspace
-
-The PDF will be formatted according to the template in `resume_template.md`, which you can customize to match your preferred style.
+1. Find tailored/optimized section files inside `cv-workspace`
+2. Prompt you to pick one if multiple exist
+3. Ask for a template if you haven't specified one (workspace templates take priority)
+4. Render the sections into a styled HTML resume and convert it to PDF under `cv-workspace/output`
 
 ### 5. Exportar a PDF
 ```bash
-# Exportar a PDF (requiere Pandoc y LaTeX)
+# Exportar usando la última versión y el template por defecto
 resumecraftr export-pdf
 
-# Exportar a PDF en español
-resumecraftr export-pdf --translate ES
-
-# Exportar a PDF usando un archivo Markdown existente (sin llamar a OpenAI)
-resumecraftr export-pdf --skip-md-gen
+# Exportar eligiendo secciones y template personalizados
+resumecraftr export-pdf --sections mi_cv.tailored_sections.json --template modern --output cv-final.pdf
 ```
 
-La opción `--skip-md-gen` es especialmente útil cuando:
-- Necesitas depurar problemas con Pandoc/LaTeX sin tener que esperar a la generación del Markdown
-- Quieres hacer ajustes manuales al archivo Markdown y volver a generar el PDF rápidamente
-- Ya tienes un archivo Markdown que quieres usar directamente
+### Custom templates
+
+You can override the packaged HTML templates by creating `cv-workspace/templates/pdf/` and dropping your own `.html` files there.
+
+1. Copy the bundled `modern.html` into that directory (the CLI copies it automatically during setup).
+2. Tweak the CSS/HTML to match your desired layout.
+3. Export with `resumecraftr export-pdf --template my_template`.
+
+The CLI searches the workspace directory first, then falls back to the bundled templates.

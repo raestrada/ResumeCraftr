@@ -1,0 +1,1 @@
+"""PyMuPDF rendering helpers."""

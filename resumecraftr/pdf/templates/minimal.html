@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      @page { size: A4; margin: 36px; }
+      * { box-sizing: border-box; }
+      body {
+        font-family: 'Source Sans Pro', 'Helvetica Neue', Arial, sans-serif;
+        margin: 0;
+        color: #1f2937;
+      }
+      .header {
+        border-bottom: 2px solid #0f172a;
+        padding-bottom: 12px;
+        margin-bottom: 18px;
+      }
+      .name { font-size: 28px; font-weight: 700; margin: 0; }
+      .headline { font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; color: #475569; }
+      .contact { display: flex; flex-wrap: wrap; gap: 10px; font-size: 11px; color: #475569; }
+      section { margin-bottom: 16px; }
+      h2 {
+        font-size: 12px;
+        letter-spacing: 0.3em;
+        color: #0f172a;
+        margin-bottom: 6px;
+      }
+      p { font-size: 11px; line-height: 1.55; margin: 0; }
+      ul { padding-left: 18px; margin: 6px 0 0; }
+      li { font-size: 10.8px; line-height: 1.4; }
+      .meta { font-size: 10.5px; color: #475569; margin-bottom: 4px; }
+      .experience-entry { margin-bottom: 12px; }
+      .skill-group { margin-bottom: 8px; font-size: 11px; }
+      .skill-group strong { text-transform: uppercase; letter-spacing: 0.08em; font-size: 10px; }
+      .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <h1 class="name">{{ resume.name }}</h1>
+      <div class="headline">{{ resume.headline }}</div>
+      <div class="contact">
+        {% for line in resume.contact_lines %}
+          <span>{{ line }}</span>
+        {% endfor %}
+      </div>
+    </div>
+    <section>
+      <h2>PROFESSIONAL SUMMARY</h2>
+      <p>{{ resume.summary }}</p>
+      {% if resume.summary_highlights %}
+      <ul>
+        {% for item in resume.summary_highlights %}
+        <li>{{ item }}</li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+    </section>
+    <div class="two-col">
+      <div>
+        {% if resume.key_strengths %}
+        <section>
+          <h2>HIGHLIGHTS</h2>
+          <ul>
+            {% for item in resume.key_strengths %}
+            <li>{{ item }}</li>
+            {% endfor %}
+          </ul>
+        </section>
+        {% endif %}
+        <section>
+          <h2>SKILLS</h2>
+          {% for label, items in resume.skills.items() if items %}
+          <div class="skill-group"><strong>{{ label }}</strong>: {{ items | join(', ') }}</div>
+          {% endfor %}
+        </section>
+        {% if resume.projects %}
+        <section>
+          <h2>PROJECTS</h2>
+          {% for project in resume.projects %}
+          <div class="experience-entry">
+            <div class="meta">{{ project.name }}</div>
+            <p>{{ project.description }}</p>
+          </div>
+          {% endfor %}
+        </section>
+        {% endif %}
+      </div>
+      <div>
+        {% if resume.experience %}
+        <section>
+          <h2>EXPERIENCE</h2>
+          {% for entry in resume.experience %}
+          <div class="experience-entry">
+            <div class="meta">{{ entry.role }} · {{ entry.company }} · {{ entry.dates }}</div>
+            {% if entry.bullets %}
+            <ul>
+              {% for bullet in entry.bullets %}
+              <li>{{ bullet }}</li>
+              {% endfor %}
+            </ul>
+            {% endif %}
+          </div>
+          {% endfor %}
+        </section>
+        {% endif %}
+        {% if resume.education %}
+        <section>
+          <h2>EDUCATION</h2>
+          {% for entry in resume.education %}
+          <div class="experience-entry">
+            <div class="meta">{{ entry.institution }} — {{ entry.degree }} ({{ entry.year }})</div>
+          </div>
+          {% endfor %}
+        </section>
+        {% endif %}
+      </div>
+    </div>
+  </body>
+</html>

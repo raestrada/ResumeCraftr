@@ -164,7 +164,6 @@
       }
 
       .vscode-logo,
-      .openai-logo,
       .github-logo {
         position: absolute;
         top: 50px;
@@ -174,11 +173,6 @@
         box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
         text-align: center;
         z-index: 10;
-      }
-
-      .openai-logo {
-        left: 20px;
-        width: 120px; /* Ajuste del ancho del contenedor OpenAI */
       }
 
       .github-logo {
@@ -196,11 +190,6 @@
         padding: 10px 15px; /* Más espacio para el logo y texto */
       }
 
-      .openai-logo img {
-        width: 100%; /* El logo de OpenAI ocupa todo el ancho del contenedor */
-        height: auto;
-      }
-
       .github-logo img {
         width: 40px; /* Tamaño cuadrado para el logo de GitHub */
         height: 40px; /* Mismo tamaño de ancho y alto */
@@ -212,7 +201,6 @@
       }
 
       .vscode-logo p,
-      .openai-logo p,
       .github-logo p {
         margin: 5px 0 0;
         font-size: 12px;
@@ -220,21 +208,18 @@
       }
 
       .vscode-logo a,
-      .openai-logo a,
       .github-logo a {
         text-decoration: none;
         color: #333;
       }
 
       .vscode-logo a:hover,
-      .openai-logo a:hover,
       .github-logo a:hover {
         color: #4a90e2;
       }
 
       @media (max-width: 768px) {
         .vscode-logo,
-        .openai-logo,
         .github-logo {
           display: none; /* Ocultar los logos en pantallas más pequeñas */
         }
@@ -286,7 +271,7 @@
   <body>
     <header>
       <div class="release-link">
-        <a href="https://github.com/raestrada/ResumeCraftr/releases/tag/v0.4.0">Release Notes v0.4.0</a>
+        <a href="https://github.com/raestrada/ResumeCraftr/releases/tag/v0.5.0-beta1">Release Notes v0.5.0-beta1</a>
       </div>
       <nav>
         <a href="https://storycraftr.app" class="highlight-link">Check Out StoryCraftr for Novel Writing!</a>
@@ -296,16 +281,6 @@
       <h1>Welcome to ResumeCraftr 📄✨</h1>
       <p>Optimize your resume for ATS systems with AI-powered precision.</p>
     </header>
-
-    <div class="openai-logo">
-      <a href="https://openai.com" target="_blank">
-        <img
-          src="https://global.discourse-cdn.com/openai1/original/3X/3/7/37b0465af49ce945753b8555462012147b0fb27a.svg"
-          alt="OpenAI Logo"
-        />
-        <p>Made with OpenAI</p>
-      </a>
-    </div>
 
     <div class="github-logo">
       <a
@@ -327,11 +302,12 @@
       <h2>Why ResumeCraftr?</h2>
       <p>
         ResumeCraftr helps job seekers create ATS-friendly resumes by
-        parsing, optimizing, and formatting CVs using OpenAI and LaTeX.
+        parsing, optimizing, and formatting CVs with LangChain graph pipelines,
+        a built-in ChromaDB (SQLite) retriever, and PyMuPDF rendering.
       </p>
       <div class="coming-soon">
         <p>Install ResumeCraftr using pipx:</p>
-        <code>pipx install git+https://github.com/raestrada/ResumeCraftr.git@v0.4.0</code>
+        <code>pipx install git+https://github.com/raestrada/ResumeCraftr.git@v0.5.0-beta1</code>
       </div>
     </section>
 

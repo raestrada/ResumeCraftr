@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      @page { size: A4; margin: 0; }
+      * { box-sizing: border-box; }
+      body {
+        font-family: 'Inter', 'Segoe UI', Roboto, sans-serif;
+        margin: 0;
+        padding: 24px 0;
+        color: #0f172a;
+        background: linear-gradient(135deg,#ecf2f9 0%,#f8fbff 100%);
+      }
+      .page {
+        width: 4.9in;
+        min-height: 10.2in;
+        margin: 0 auto;
+        background: #fff;
+        padding: 26px 28px 32px;
+        box-shadow: 0 25px 80px rgba(15,23,42,0.18);
+        border-radius: 22px;
+      }
+      header {
+        border-bottom: 1px solid #dbe4f0;
+        padding-bottom: 16px;
+        margin-bottom: 26px;
+      }
+      .hero {
+        display: flex;
+        justify-content: space-between;
+        gap: 24px;
+        align-items: flex-end;
+      }
+      .name-block h1 {
+        font-size: 34px;
+        margin: 0;
+        letter-spacing: 0.2px;
+        color: #0b152f;
+      }
+      .contact {
+        text-align: right;
+        font-size: 11px;
+        line-height: 1.6;
+        color: #334155;
+      }
+      .contact div { margin-bottom: 2px; }
+      section { margin-bottom: 24px; }
+      section h2 {
+        font-size: 10.5px;
+        letter-spacing: 0.45em;
+        margin-bottom: 10px;
+        color: #64748b;
+      }
+      .card {
+        border-radius: 16px;
+        background: #f7faff;
+        padding: 18px 22px;
+        border: 1px solid #dbe4f0;
+      }
+      .summary p {
+        font-size: 11.2px;
+        line-height: 1.75;
+        color: #1e293b;
+        margin: 0;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: 1.05fr 1fr;
+        gap: 20px;
+      }
+      ul { padding-left: 18px; margin: 10px 0 0; }
+      li { font-size: 10.8px; line-height: 1.5; margin-bottom: 4px; }
+      .pill-list li { list-style: none; padding-left: 0; }
+      .skill-group { margin-bottom: 10px; }
+      .skill-group .label {
+        font-weight: 600;
+        font-size: 10px;
+        letter-spacing: 0.15em;
+        color: #475569;
+        margin-bottom: 3px;
+        text-transform: uppercase;
+      }
+      .skill-group .value { font-size: 11px; color: #1f2937; }
+      .experience-entry { margin-bottom: 16px; }
+      .experience-entry .role { font-weight: 600; font-size: 12.2px; color: #0f172a; }
+      .experience-entry .meta { font-size: 10.5px; color: #64748b; margin: 4px 0 6px; }
+      .projects .project-name { font-weight: 600; color: #0f172a; }
+      .tech-list { font-size: 10px; color: #475569; padding-left: 16px; margin: 6px 0 0; }
+      .education-entry { margin-bottom: 12px; }
+      .education-entry .school { font-weight: 600; color: #111827; }
+      .education-entry .meta { font-size: 10.5px; color: #5f6c82; }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <header>
+        <div class="hero">
+          <div class="name-block">
+            <h1>{{ resume.name }}</h1>
+            <div style="font-size:12px; color:#475569; letter-spacing:0.25em; text-transform:uppercase; margin-top:6px;">
+              {{ resume.headline }}
+            </div>
+          </div>
+          <div class="contact">
+            {% for line in resume.contact_lines %}
+              <div>{{ line }}</div>
+            {% endfor %}
+          </div>
+        </div>
+      </header>
+      <section class="summary">
+        <h2>PROFESSIONAL SUMMARY</h2>
+        <div class="card">
+          <p>{{ resume.summary }}</p>
+          {% if resume.summary_highlights %}
+          <ul>
+            {% for item in resume.summary_highlights %}
+            <li>{{ item }}</li>
+            {% endfor %}
+          </ul>
+          {% endif %}
+        </div>
+      </section>
+      <div class="grid">
+        <div>
+          {% if resume.key_strengths %}
+          <section>
+            <h2>CAREER HIGHLIGHTS</h2>
+            <div class="card">
+              <ul class="pill-list">
+                {% for item in resume.key_strengths %}
+                <li>• {{ item }}</li>
+                {% endfor %}
+              </ul>
+            </div>
+          </section>
+          {% endif %}
+          <section>
+            <h2>TECHNICAL SKILLS</h2>
+            <div class="card">
+              {% for label, items in resume.skills.items() if items %}
+              <div class="skill-group">
+                <div class="label">{{ label }}</div>
+                <div class="value">{{ items | join(', ') }}</div>
+              </div>
+              {% endfor %}
+            </div>
+          </section>
+          {% if resume.projects %}
+          <section class="projects">
+            <h2>SELECTED PROJECTS</h2>
+            <div class="card">
+              {% for project in resume.projects %}
+              <div class="project-entry">
+                <div class="project-name">{{ project.name }}</div>
+                <p>{{ project.description }}</p>
+                {% if project.highlights %}
+                <ul class="tech-list">
+                  {% for tech in project.highlights %}
+                  <li>{{ tech }}</li>
+                  {% endfor %}
+                </ul>
+                {% endif %}
+              </div>
+              {% endfor %}
+            </div>
+          </section>
+          {% endif %}
+        </div>
+        <div>
+          {% if resume.experience %}
+          <section>
+            <h2>WORK EXPERIENCE</h2>
+            <div class="card">
+              {% for entry in resume.experience %}
+              <div class="experience-entry">
+                <div class="role">{{ entry.role }}</div>
+                <div class="meta">{{ entry.company }} · {{ entry.dates }}</div>
+                {% if entry.bullets %}
+                <ul>
+                  {% for bullet in entry.bullets %}
+                  <li>{{ bullet }}</li>
+                  {% endfor %}
+                </ul>
+                {% endif %}
+              </div>
+              {% endfor %}
+            </div>
+          </section>
+          {% endif %}
+          {% if resume.education %}
+          <section>
+            <h2>EDUCATION</h2>
+            <div class="card">
+              {% for entry in resume.education %}
+              <div class="education-entry">
+                <div class="school">{{ entry.institution }}</div>
+                <div class="meta">{{ entry.degree }} · {{ entry.year }}</div>
+              </div>
+              {% endfor %}
+            </div>
+          </section>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

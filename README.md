@@ -1,6 +1,6 @@
 # <img src="https://res.cloudinary.com/dyknhuvxt/image/upload/f_auto,q_auto/v1736189459/resumecraftr_eb7drc.png" alt="ResumeCraftr Logo" width="100" height="100"> ResumeCraftr - AI-powered ATS Resume Optimization 📄🤖
 
-Welcome to [**ResumeCraftr**](https://resumecraftr.app), the open-source tool designed to optimize resumes for ATS (Applicant Tracking Systems) using AI and Markdown formatting. ResumeCraftr extracts, restructures, and formats CVs to ensure they meet ATS requirements while maintaining readability and professionalism.
+Welcome to [**ResumeCraftr**](https://resumecraftr.app), the open-source tool designed to optimize resumes for ATS (Applicant Tracking Systems) using modern, Python-only tooling. ResumeCraftr now leans on LangChain graph pipelines, embedded ChromaDB retrieval, and PyMuPDF rendering to extract, tailor, and format CVs while keeping the stack lightweight and future-proof.
 
 ---
 
@@ -14,6 +14,10 @@ ResumeCraftr now fully supports Windows, making it easier for more users to opti
 
 ResumeCraftr now allows you to create and manage CV sections interactively without needing to parse an existing CV. This makes it easier to build your resume from scratch or update specific sections.
 
+### 🌟 LangChain-native RAG & PyMuPDF 📚
+
+LLM interactions now run through LangChain graph pipelines with retrieval backed by an embedded ChromaDB store, and PDFs are rendered via PyMuPDF for precise, dependency-free styling.
+
 ---
 
 ## What's New? Discover AI Craftr 🌐
@@ -22,9 +26,9 @@ ResumeCraftr now allows you to create and manage CV sections interactively witho
 
 ---
 
-## Release Notes v0.4.0
+## Release Notes v0.5.0-beta1
 
-You can find the release notes for version `v0.4.0` [here](https://github.com/raestrada/ResumeCraftr/releases/tag/v0.4.0).
+You can find the release notes for version `v0.5.0-beta1` [here](https://github.com/raestrada/ResumeCraftr/releases/tag/v0.5.0-beta1).
 
 ## Step 1: Install ResumeCraftr
 
@@ -33,7 +37,7 @@ First, install **ResumeCraftr** using [pipx](https://pypa.github.io/pipx/), a to
 To install **ResumeCraftr**, run:
 
 ```bash
-pipx install git+https://github.com/raestrada/ResumeCraftr.git@v0.4.0
+pipx install git+https://github.com/raestrada/ResumeCraftr.git@v0.5.0-beta1
 ```
 
 ## Quick Examples
@@ -91,14 +95,11 @@ poetry run resumecraftr tailor-cv
 ### Export your CV to PDF:
 
 ```bash
-# Exportar a PDF (requiere Pandoc y LaTeX)
+# Render the most recent tailored sections with PyMuPDF
 resumecraftr export-pdf
 
-# Exportar a PDF en español
-resumecraftr export-pdf --translate ES
-
-# Exportar a PDF usando un archivo Markdown existente (sin llamar a OpenAI)
-resumecraftr export-pdf --skip-md-gen
+# Choose a specific tailored file and output path
+resumecraftr export-pdf --sections my_cv.tailored_sections.json --output resume.pdf
 ```
 
 ## Full Guide
@@ -143,5 +144,3 @@ Join us in making ResumeCraftr the best AI-powered resume tool! 🚀
 ![AI Craftr Logo](https://res.cloudinary.com/dyknhuvxt/image/upload/v1730059761/aicraftr_qzknf4.png)
 
 Learn more about **AI Craftr** and discover other tools like **StoryCraftr** for novel writing at [https://aicraftr.app](https://aicraftr.app).
-
-

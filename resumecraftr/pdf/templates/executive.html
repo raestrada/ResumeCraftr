@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      @page { size: A4; margin: 0; }
+      body {
+        font-family: 'Cormorant Garamond', 'Times New Roman', serif;
+        background: #f3f0eb;
+        margin: 0;
+        padding: 0;
+      }
+      .wrapper {
+        display: grid;
+        grid-template-columns: 2.4in 4.6in;
+        margin: 0.4in auto;
+        width: 7.5in;
+        box-shadow: 0 15px 45px rgba(44,31,18,0.15);
+      }
+      .sidebar {
+        background: #1b1b1f;
+        color: #fefefe;
+        padding: 32px 24px;
+      }
+      .sidebar h1 { font-size: 32px; margin: 0 0 6px; }
+      .sidebar .title { text-transform: uppercase; font-size: 12px; letter-spacing: 0.25em; margin-bottom: 18px; }
+      .sidebar section { margin-bottom: 24px; }
+      .sidebar h2 { font-size: 12px; letter-spacing: 0.3em; color: #9aa2b1; margin-bottom: 6px; }
+      .sidebar p, .sidebar li { font-size: 11px; line-height: 1.6; margin: 0; }
+      .sidebar ul { list-style: none; padding-left: 0; margin: 0; }
+      .content {
+        background: #fff;
+        padding: 34px 42px;
+      }
+      .content section { margin-bottom: 22px; }
+      .content h2 { font-size: 13px; letter-spacing: 0.25em; color: #6b4f2d; margin-bottom: 8px; }
+      .content p { font-size: 11.3px; line-height: 1.65; margin: 0; }
+      .content ul { padding-left: 18px; margin: 6px 0 0; }
+      .content li { font-size: 10.8px; line-height: 1.4; }
+      .entry { margin-bottom: 14px; }
+      .entry .meta { font-weight: 600; font-size: 12px; color: #2c1810; }
+      .entry .submeta { font-size: 11px; color: #6c5846; margin-bottom: 4px; }
+    </style>
+  </head>
+  <body>
+    <div class="wrapper">
+      <div class="sidebar">
+        <h1>{{ resume.name }}</h1>
+        <div class="title">{{ resume.headline }}</div>
+        <section>
+          <h2>CONTACT</h2>
+          <ul>
+            {% for line in resume.contact_lines %}
+            <li>{{ line }}</li>
+            {% endfor %}
+          </ul>
+        </section>
+        <section>
+          <h2>HIGHLIGHTS</h2>
+          <ul>
+            {% for item in resume.key_strengths %}
+            <li>{{ item }}</li>
+            {% endfor %}
+          </ul>
+        </section>
+        <section>
+          <h2>SKILLS</h2>
+          {% for label, items in resume.skills.items() if items %}
+          <p><strong>{{ label }}</strong><br/>{{ items | join(', ') }}</p>
+          {% endfor %}
+        </section>
+      </div>
+      <div class="content">
+        <section>
+          <h2>PROFILE</h2>
+          <p>{{ resume.summary }}</p>
+        </section>
+        {% if resume.experience %}
+        <section>
+          <h2>EXPERIENCE</h2>
+          {% for entry in resume.experience %}
+          <div class="entry">
+            <div class="meta">{{ entry.role }}</div>
+            <div class="submeta">{{ entry.company }} · {{ entry.dates }}</div>
+            {% if entry.bullets %}
+            <ul>
+              {% for bullet in entry.bullets %}
+              <li>{{ bullet }}</li>
+              {% endfor %}
+            </ul>
+            {% endif %}
+          </div>
+          {% endfor %}
+        </section>
+        {% endif %}
+        {% if resume.projects %}
+        <section>
+          <h2>PROJECTS</h2>
+          {% for project in resume.projects %}
+          <div class="entry">
+            <div class="meta">{{ project.name }}</div>
+            <p>{{ project.description }}</p>
+          </div>
+          {% endfor %}
+        </section>
+        {% endif %}
+        {% if resume.education %}
+        <section>
+          <h2>EDUCATION</h2>
+          {% for entry in resume.education %}
+          <div class="entry">
+            <div class="meta">{{ entry.institution }}</div>
+            <div class="submeta">{{ entry.degree }} · {{ entry.year }}</div>
+          </div>
+          {% endfor %}
+        </section>
+        {% endif %}
+      </div>
+    </div>
+  </body>
+</html>
