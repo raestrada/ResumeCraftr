@@ -3,10 +3,8 @@ import os
 
 import click
 import fitz
-from rich.console import Console
-from rich.progress import Progress
 
-console = Console()
+from resumecraftr.cli.ui import console, create_progress, activity
 CONFIG_FILE = "cv-workspace/resumecraftr.json"
 
 @click.command()
@@ -28,20 +26,20 @@ def import_cv(pdf_path):
         workspace_dir, os.path.basename(pdf_path).replace(".pdf", ".txt")
     )
 
-    console.print(f"[bold green]Importing CV from:[/bold green] {pdf_path}")
+    console.rule("[bold blue]Import CV[/bold blue]")
+    console.print(f"[bold]PDF:[/] {pdf_path}")
 
     with fitz.open(pdf_path) as document, open(
         output_filename, "w", encoding="utf-8"
-    ) as text_file:
-        with Progress() as progress:
-            task = progress.add_task(
-                "[cyan]Processing pages...", total=document.page_count
-            )
-            for page in document:
-                text = page.get_text("text")
-                if text:
-                    text_file.write(text.strip() + "\n")
-                progress.update(task, advance=1)
+    ) as text_file, create_progress() as progress:
+        task = progress.add_task(
+            "[cyan]Extracting pages", total=document.page_count
+        )
+        for page in document:
+            text = page.get_text("text")
+            if text:
+                text_file.write(text.strip() + "\n")
+            progress.advance(task)
 
     console.print(
         f"[bold green]CV imported and saved to:[/bold green] {output_filename}"
@@ -57,8 +55,9 @@ def import_cv(pdf_path):
     extracted_files.append(os.path.basename(output_filename))
     config["extracted_files"] = list(set(extracted_files))  # Ensure unique values
 
-    with open(CONFIG_FILE, "w", encoding="utf-8") as config_file:
-        json.dump(config, config_file, indent=4)
+    with activity("Updating workspace config"):
+        with open(CONFIG_FILE, "w", encoding="utf-8") as config_file:
+            json.dump(config, config_file, indent=4)
 
     console.print(
         f"[bold green]Updated {CONFIG_FILE} with imported file.[/bold green]"

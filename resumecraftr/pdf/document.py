@@ -39,6 +39,12 @@ class ProjectEntry:
 
 
 @dataclass
+class PublicationEntry:
+    title: str
+    details: str
+
+
+@dataclass
 class ResumeDocument:
     name: str
     headline: str
@@ -50,6 +56,7 @@ class ResumeDocument:
     experience: List[ExperienceEntry]
     education: List[EducationEntry]
     projects: List[ProjectEntry]
+    publications: List[PublicationEntry]
 
 
 def build_resume_document(extracted: Dict, tailored: Dict) -> ResumeDocument:
@@ -60,13 +67,22 @@ def build_resume_document(extracted: Dict, tailored: Dict) -> ResumeDocument:
     original_summary = _clean_text(raw_summary.get("Summary"))
 
     tailored_summary = tailored.get("Summary", {})
-    summary_text = _clean_text(tailored_summary.get("summary"), original_summary)
-    summary_highlights = _clean_list(tailored_summary.get("highlights", []))
+    summary_text = _clean_text(
+        tailored_summary.get("summary") if isinstance(tailored_summary, dict) else None,
+        original_summary,
+    )
+    summary_highlights = _clean_list(
+        tailored_summary.get("highlights", []) if isinstance(tailored_summary, dict) else []
+    )
 
     headline = contact.get("Title") or original_summary or summary_text.split(".")[0]
     headline = _clean_text(headline, "Principal Software Engineer")
 
-    key_strengths = _clean_list(tailored.get("Work Experience", {}).get("highlights", []))
+    work_tailored = tailored.get("Work Experience")
+    if isinstance(work_tailored, dict):
+        key_strengths = _clean_list(work_tailored.get("highlights", []))
+    else:
+        key_strengths = []
 
     skills_section = extracted.get("Technical Skills", {})
     skills = {
@@ -111,6 +127,26 @@ def build_resume_document(extracted: Dict, tailored: Dict) -> ResumeDocument:
             )
         )
 
+    publication_entries: List[PublicationEntry] = []
+    publications_raw = extracted.get("Publications & Open Source Contributions")
+    if isinstance(publications_raw, list):
+        for entry in publications_raw:
+            if not isinstance(entry, dict):
+                continue
+            publication_entries.append(
+                PublicationEntry(
+                    title=_clean_text(entry.get("Title") or entry.get("name"), "Contribution"),
+                    details=_clean_text(entry.get("Details") or entry.get("description")),
+                )
+            )
+    elif isinstance(publications_raw, dict):
+        publication_entries.append(
+            PublicationEntry(
+                title=_clean_text(publications_raw.get("summary"), "Contribution"),
+                details=_clean_text(publications_raw.get("details") or ""),
+            )
+        )
+
     contact_lines = []
     labels = [
         ("Email", contact.get("Email")),
@@ -135,4 +171,5 @@ def build_resume_document(extracted: Dict, tailored: Dict) -> ResumeDocument:
         experience=experience_entries,
         education=education_entries,
         projects=project_entries,
+        publications=publication_entries,
     )

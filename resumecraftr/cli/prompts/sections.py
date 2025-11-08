@@ -27,14 +27,18 @@ RAW_PROMPTS = {
     If no skills are found, return empty lists. Do NOT include any additional text, explanations, or markdown formatting. Return ONLY the JSON object.
     """,
     "Work Experience": r"""
-    Extract the work experience section as a structured JSON array in {language}. Each entry must have:
+    Extract **every** work-experience entry in {language} as a JSON array. Scan the entire document and include all roles (there may be more than 20). Each entry must be a JSON object with:
     {{
         "Job Title": "string",
         "Company": "string",
         "Dates of Employment": "string",
-        "Responsibilities": ["string", ...] or []
+        "Responsibilities": ["string", ...] // include every bullet/achievement
     }}
-    Ensure all details, including company name, employment dates, and full responsibilities, are captured without summarization. Do NOT include any additional text, explanations, or markdown formatting. Return ONLY the JSON array.
+    Requirements:
+    - Do not skip or summarize roles; keep adding entries until all experiences found in the document are captured.
+    - Preserve the original order from most recent to oldest.
+    - Never limit the array length or truncate responsibilities.
+    - Return ONLY the JSON array (no commentary or Markdown).
     """,
     "Projects": r"""
     Extract all projects mentioned in the text in {language}. Each project must be structured as:

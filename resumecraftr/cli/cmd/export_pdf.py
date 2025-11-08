@@ -5,13 +5,11 @@ from datetime import datetime
 from pathlib import Path
 
 import click
-from rich.console import Console
 from rich.prompt import Prompt
 
 from resumecraftr.pdf.document import build_resume_document
 from resumecraftr.pdf.html_renderer import HtmlPdfRenderer, get_available_templates
-
-console = Console()
+from resumecraftr.cli.ui import console, activity
 CONFIG_FILE = Path("cv-workspace/resumecraftr.json")
 
 
@@ -123,7 +121,8 @@ def export_pdf(
         timestamp = datetime.now().strftime("%Y%m%d-%H%M")
         output_path = output_dir / f"resume-{slug}-{timestamp}.pdf"
 
-    renderer.render(resume_document, output_path)
+    with activity(f"Rendering {template_name} template"):
+        renderer.render(resume_document, output_path)
     console.print(f"[bold green]PDF generated at {output_path}[/bold green]")
 
 

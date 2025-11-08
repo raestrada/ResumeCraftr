@@ -1,12 +1,10 @@
 import os
 import json
 import click
-from rich.console import Console
 from rich.prompt import Prompt, Confirm
 from rich.panel import Panel
 from resumecraftr.cli.prompts.sections import RAW_PROMPTS
-
-console = Console()
+from resumecraftr.cli.ui import console, activity
 CONFIG_FILE = os.path.join("cv-workspace", "resumecraftr.json")
 
 def get_cv_path(cv_name):
@@ -60,8 +58,9 @@ def update_config_file(cv_name):
             f.write(f"# {cv_name}\n\nThis is a dummy file created for CV '{cv_name}'")
         
         # Save the updated configuration
-        with open(CONFIG_FILE, "w", encoding="utf-8") as f:
-            json.dump(config, f, indent=2, ensure_ascii=False)
+        with activity("Updating workspace config"):
+            with open(CONFIG_FILE, "w", encoding="utf-8") as f:
+                json.dump(config, f, indent=2, ensure_ascii=False)
         
         # Verify the update was successful
         with open(CONFIG_FILE, "r", encoding="utf-8") as f:
@@ -80,6 +79,7 @@ def update_config_file(cv_name):
 @click.argument("cv_name")
 def new_cv(cv_name):
     """Create a new empty CV with the given name."""
+    console.rule(f"[bold blue]New CV: {cv_name}[/bold blue]")
     # Check if CV already exists
     cv_path = get_cv_path(cv_name)
     if os.path.exists(cv_path):
@@ -112,7 +112,8 @@ def new_cv(cv_name):
     os.makedirs("cv-workspace", exist_ok=True)
     
     # Save the CV
-    save_cv(cv_name, cv_data)
+    with activity("Writing template file"):
+        save_cv(cv_name, cv_data)
     
     # Update the configuration file
     if update_config_file(cv_name):

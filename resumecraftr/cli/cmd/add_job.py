@@ -1,10 +1,8 @@
 import os
 import json
 import click
-from rich.console import Console
 from rich.prompt import Prompt
-
-console = Console()
+from resumecraftr.cli.ui import console, activity
 CONFIG_FILE = os.path.join("cv-workspace", "resumecraftr.json")
 JOBS_DIR = os.path.join("cv-workspace", "job_descriptions")
 
@@ -20,6 +18,8 @@ def add_job(job_name, content, file):
 
     job_file = os.path.join(JOBS_DIR, f"{job_name}.txt")
 
+    console.rule("[bold blue]Add Job[/bold blue]")
+
     if file:
         with open(file, "r", encoding="utf-8") as f:
             job_content = f.read()
@@ -31,8 +31,9 @@ def add_job(job_name, content, file):
         )
         return
 
-    with open(job_file, "w", encoding="utf-8") as f:
-        f.write(job_content)
+    with activity("Writing job description"):
+        with open(job_file, "w", encoding="utf-8") as f:
+            f.write(job_content)
 
     # Update resumecraftr.json
     config = {}
@@ -45,8 +46,9 @@ def add_job(job_name, content, file):
         job_list.append(os.path.basename(job_file))
     config["job_descriptions"] = job_list
 
-    with open(CONFIG_FILE, "w", encoding="utf-8") as config_file:
-        json.dump(config, config_file, indent=4)
+    with activity("Updating workspace config"):
+        with open(CONFIG_FILE, "w", encoding="utf-8") as config_file:
+            json.dump(config, config_file, indent=4)
 
     console.print(f"[bold green]Job description saved: {job_file}[/bold green]")
     console.print(

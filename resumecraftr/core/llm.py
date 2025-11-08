@@ -33,7 +33,7 @@ class EmbeddingConfig:
     """Configuration for embedding generation."""
 
     provider: Literal["huggingface", "openai", "ollama"] = "huggingface"
-    model: str = "sentence-transformers/all-MiniLM-L6-v2"
+    model: str = "sentence-transformers/all-mpnet-base-v2"
 
 
 def _read_openrouter_api_key() -> Optional[str]:
