@@ -266,6 +266,34 @@
         white-space: pre-wrap; /* Mantiene los saltos de línea pero permite ajustar el texto */
         overflow-wrap: break-word; /* Otra opción para asegurar que las palabras largas se ajusten */
       }
+
+      .sample-highlight {
+        max-width: 960px;
+        margin: 2em auto 0;
+        background-color: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0px 12px 24px rgba(0, 0, 0, 0.08);
+        padding: 2em;
+        text-align: left;
+      }
+
+      .sample-highlight h2 {
+        margin-top: 0;
+        color: #2a7f3d;
+      }
+
+      .sample-highlight p {
+        font-size: 1.1em;
+      }
+
+      .sample-highlight .button {
+        margin-top: 1em;
+        background-color: #4a90e2;
+      }
+
+      .sample-highlight .button:hover {
+        background-color: #357abd;
+      }
     </style>
   </head>
   <body>
@@ -281,6 +309,18 @@
       <h1>Welcome to ResumeCraftr 📄✨</h1>
       <p>Optimize your resume for ATS systems with AI-powered precision.</p>
     </header>
+
+    <section class="sample-highlight">
+      <h2>New Marketing Sample: Principal Engineer</h2>
+      <p>
+        See how ResumeCraftr tailors a 15-year journey across ten growth and marketing platform roles.
+        Download John Doe’s Principal Engineer CV (built with LangChain pipelines, ChromaDB retrieval, and the
+        modern PyMuPDF template) to share with your stakeholders or marketing team.
+      </p>
+      <a class="button" href="samples/john-doe-principal-engineer.pdf" target="_blank" rel="noopener">
+        Download the sample CV
+      </a>
+    </section>
 
     <div class="github-logo">
       <a
