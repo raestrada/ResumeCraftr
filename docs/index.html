@@ -294,12 +294,48 @@
       .sample-highlight .button:hover {
         background-color: #357abd;
       }
+
+      .sample-inline {
+        margin: 1.5em auto;
+        max-width: 720px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        font-size: 1rem;
+        color: #0f172a;
+        background: linear-gradient(135deg, rgba(15, 87, 42, 0.15), rgba(79, 70, 229, 0.1));
+        border: 1px solid rgba(31, 90, 42, 0.2);
+        padding: 0.8em 1.2em;
+        border-radius: 999px;
+        backdrop-filter: blur(4px);
+      }
+
+      .sample-inline .badge {
+        background-color: #1f5a2a;
+        color: #fff;
+        padding: 0.2em 0.6em;
+        border-radius: 999px;
+        font-size: 0.8rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .sample-inline a {
+        color: #1f5a2a;
+        font-weight: bold;
+        text-decoration: none;
+      }
+
+      .sample-inline a:hover {
+        text-decoration: underline;
+      }
     </style>
   </head>
   <body>
     <header>
       <div class="release-link">
-        <a href="https://github.com/raestrada/ResumeCraftr/releases/tag/v0.5.0-beta1">Release Notes v0.5.0-beta1</a>
+        <a href="https://github.com/raestrada/ResumeCraftr/releases/tag/v0.6.0-beta2">Release Notes v0.6.0-beta2</a>
       </div>
       <nav>
         <a href="https://storycraftr.app" class="highlight-link">Check Out StoryCraftr for Novel Writing!</a>
@@ -310,17 +346,11 @@
       <p>Optimize your resume for ATS systems with AI-powered precision.</p>
     </header>
 
-    <section class="sample-highlight">
-      <h2>New Marketing Sample: Principal Engineer</h2>
-      <p>
-        See how ResumeCraftr tailors a 15-year journey across ten growth and marketing platform roles.
-        Download John Doe’s Principal Engineer CV (built with LangChain pipelines, ChromaDB retrieval, and the
-        modern PyMuPDF template) to share with your stakeholders or marketing team.
-      </p>
-      <a class="button" href="samples/john-doe-principal-engineer.pdf" target="_blank" rel="noopener">
-        Download the sample CV
-      </a>
-    </section>
+    <div class="sample-inline">
+      <span class="badge">CLI Demo</span>
+      <span>See a ResumeCraftr-generated Principal Engineer CV.</span>
+      <a href="samples/john-doe-principal-engineer.pdf" target="_blank" rel="noopener">View sample</a>
+    </div>
 
     <div class="github-logo">
       <a
@@ -347,7 +377,7 @@
       </p>
       <div class="coming-soon">
         <p>Install ResumeCraftr using pipx:</p>
-        <code>pipx install git+https://github.com/raestrada/ResumeCraftr.git@v0.5.0-beta1</code>
+        <code>pipx install git+https://github.com/raestrada/ResumeCraftr.git@v0.6.0-beta2</code>
       </div>
     </section>
 

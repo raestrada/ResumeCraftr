@@ -26,9 +26,9 @@ LLM interactions now run through LangChain graph pipelines with retrieval backed
 
 ---
 
-## Release Notes v0.5.0-beta1
+## Release Notes v0.6.0-beta2
 
-You can find the release notes for version `v0.5.0-beta1` [here](https://github.com/raestrada/ResumeCraftr/releases/tag/v0.5.0-beta1).
+You can find the release notes for version `v0.6.0-beta2` [here](https://github.com/raestrada/ResumeCraftr/releases/tag/v0.6.0-beta2).
 
 ## Step 1: Install ResumeCraftr
 
@@ -37,7 +37,7 @@ First, install **ResumeCraftr** using [pipx](https://pypa.github.io/pipx/), a to
 To install **ResumeCraftr**, run:
 
 ```bash
-pipx install git+https://github.com/raestrada/ResumeCraftr.git@v0.5.0-beta1
+pipx install git+https://github.com/raestrada/ResumeCraftr.git@v0.6.0-beta2
 ```
 
 ## Quick Examples
@@ -100,6 +100,15 @@ resumecraftr export-pdf
 
 # Choose a specific tailored file and output path
 resumecraftr export-pdf --sections my_cv.tailored_sections.json --output resume.pdf
+```
+
+### Run the end-to-end marketing sample:
+
+```bash
+# Generates the John Doe Principal Engineer CV, tailors it, and renders a PDF with the modern template
+bash examples/resumecraftr_example.sh --use-poetry
+
+# The published PDF is copied to docs/samples/john-doe-principal-engineer.pdf for GitHub Pages hosting
 ```
 
 ## Full Guide
