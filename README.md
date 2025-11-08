@@ -100,7 +100,12 @@ resumecraftr export-pdf
 
 # Choose a specific tailored file and output path
 resumecraftr export-pdf --sections my_cv.tailored_sections.json --output resume.pdf
+
+# Translate sections before rendering (e.g., to Spanish)
+resumecraftr export-pdf --template modern --translate ES
 ```
+
+By default PDFs land in `cv-workspace/output/` using deterministic names such as `jdoe_modern_es_principal-engineer.pdf`, so rerunning the same template overwrites the prior export. Translation runs cache their JSON next to the tailored file (`my_cv.tailored_sections.es.translated.json`) for quick re-use.
 
 ### Run the end-to-end marketing sample:
 
@@ -110,6 +115,8 @@ bash examples/resumecraftr_example.sh --use-poetry
 
 # The published PDF is copied to docs/samples/john-doe-principal-engineer.pdf for GitHub Pages hosting
 ```
+
+Preview the CLI-generated PDF here: [Principal Engineer sample](https://resumecraftr.app/samples/john-doe-principal-engineer.pdf).
 
 ## Full Guide
 

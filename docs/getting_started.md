@@ -247,6 +247,9 @@ resumecraftr export-pdf \
   --sections senior-role.tailored_sections.json \
   --template modern \
   --output output/senior-role.pdf
+
+# Translate first, then render (example: French)
+resumecraftr export-pdf --template minimal --translate FR
 ```
 
 The command will:
@@ -255,6 +258,8 @@ The command will:
 3. Ask for a template if you haven't specified one (workspace templates take priority)
 4. Render the sections into a styled HTML resume and convert it to PDF under `cv-workspace/output`
 
+Exports are saved using deterministic filenames derived from the candidate name, template, language, and job slug, e.g. `jdoe_modern_es_principal-engineer.pdf`. Re-running the same template simply overwrites the previous file. When `--translate` is provided, the translated JSON is cached next to the tailored sections (`my_cv.tailored_sections.es.translated.json`) to speed up subsequent renders.
+
 ### 5. Exportar a PDF
 ```bash
 # Exportar usando la última versión y el template por defecto
@@ -262,6 +267,9 @@ resumecraftr export-pdf
 
 # Exportar eligiendo secciones y template personalizados
 resumecraftr export-pdf --sections mi_cv.tailored_sections.json --template modern --output cv-final.pdf
+
+# Traducir a otro idioma antes de exportar
+resumecraftr export-pdf --template executive --translate ES
 ```
 
 ### Custom templates
