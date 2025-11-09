@@ -103,6 +103,24 @@ def build_resume_document(extracted: Dict, tailored: Dict) -> ResumeDocument:
             )
         )
 
+    def sort_key(exp: ExperienceEntry):
+        import re
+
+        dates = exp.dates
+        if not dates:
+            return (0, 0)
+        parts = re.split(r"\s*-\s*", dates)
+        end = parts[-1]
+        year = None
+        if re.search(r"\bpresent\b", end, re.IGNORECASE):
+            year = 9999
+        else:
+            match = re.search(r"(20\d{2}|19\d{2})", end)
+            year = int(match.group(1)) if match else 0
+        return (year, exp.company)
+
+    experience_entries.sort(key=sort_key, reverse=True)
+
     education_entries: List[EducationEntry] = []
     for entry in extracted.get("Education", []) or []:
         if not isinstance(entry, dict):
