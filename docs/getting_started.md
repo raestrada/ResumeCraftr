@@ -25,7 +25,7 @@ ResumeCraftr now routes every LLM call through LangChain/ LangGraph, persists kn
 Ensure you have `pipx` installed, then install ResumeCraftr with:
 
 ```bash
-pipx install git+https://github.com/raestrada/ResumeCraftr.git@v0.6.0-beta2
+pipx install git+https://github.com/raestrada/ResumeCraftr.git@v0.7.0-beta3
 ```
 
 PyMuPDF ships with the project, so there is no longer a dependency on Pandoc or LaTeX. You only need:

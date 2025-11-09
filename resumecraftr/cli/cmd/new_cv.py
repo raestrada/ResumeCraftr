@@ -5,12 +5,14 @@ from rich.prompt import Prompt, Confirm
 from rich.panel import Panel
 from resumecraftr.cli.prompts.sections import RAW_PROMPTS
 from resumecraftr.cli.ui import console, activity
+from resumecraftr.cli.utils.naming import slugify, candidate_slug
 CONFIG_FILE = os.path.join("cv-workspace", "resumecraftr.json")
 
 def get_cv_path(cv_name):
     """Get the path to a CV JSON file."""
-    # Save directly in cv-workspace directory
-    return os.path.join("cv-workspace", f"dummy_{cv_name}.extracted_sections.json")
+    base = slugify(cv_name, "cv")
+    filename = f"{candidate_slug(cv_name, base)}_{base}.extracted_sections.json"
+    return os.path.join("cv-workspace", filename)
 
 def load_cv(cv_name):
     """Load a CV from its JSON file."""
@@ -39,8 +41,9 @@ def update_config_file(cv_name):
         with open(CONFIG_FILE, "r", encoding="utf-8") as f:
             config = json.load(f)
         
-        # Create a dummy text file path to simulate extraction
-        dummy_txt_path = f"dummy_{cv_name}.txt"
+        base = slugify(cv_name, "cv")
+        stub = f"{candidate_slug(cv_name, base)}_{base}"
+        dummy_txt_path = f"{stub}.txt"
         
         # Ensure the extracted_files section exists
         if "extracted_files" not in config:
@@ -56,6 +59,9 @@ def update_config_file(cv_name):
         dummy_txt_full_path = os.path.join("cv-workspace", dummy_txt_path)
         with open(dummy_txt_full_path, "w", encoding="utf-8") as f:
             f.write(f"# {cv_name}\n\nThis is a dummy file created for CV '{cv_name}'")
+
+        parsed_map = config.setdefault("parsed_sections", {})
+        parsed_map[dummy_txt_path] = os.path.basename(get_cv_path(cv_name))
         
         # Save the updated configuration
         with activity("Updating workspace config"):

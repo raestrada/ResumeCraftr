@@ -8,6 +8,7 @@ from rich.prompt import Prompt
 from resumecraftr.cli.agent import execute_prompt, create_or_get_agent
 from resumecraftr.cli.prompts.sections import RAW_PROMPTS
 from resumecraftr.cli.utils.json import clean_json_response
+from resumecraftr.cli.utils.naming import slugify, candidate_name_from_sections, candidate_slug
 from resumecraftr.cli.ui import console, create_progress, activity
 CONFIG_FILE = os.path.join("cv-workspace", "resumecraftr.json")
 try:
@@ -146,14 +147,14 @@ def parse_cv():
         return
 
     with open(CONFIG_FILE, "r", encoding="utf-8") as f:
-        config = json.load(f)
+        workspace_config = json.load(f)
 
     # Only create the agent when we're about to use OpenAI
     with activity("Loading LangChain runtime"):
         create_or_get_agent()
 
-    extracted_files = config.get("extracted_files", [])
-    language = config.get("primary_language", "EN")
+    extracted_files = workspace_config.get("extracted_files", [])
+    language = workspace_config.get("primary_language", "EN")
 
     if not extracted_files:
         console.print(
@@ -238,10 +239,10 @@ def parse_cv():
                 extracted_data[section_name] = result
 
     for section_name, value in list(extracted_data.items()):
-        config = SECTION_CHUNK_CONFIG.get(section_name)
-        if not config:
+        chunk_cfg = SECTION_CHUNK_CONFIG.get(section_name)
+        if not chunk_cfg:
             continue
-        merge_strategy = config.get("merge")
+        merge_strategy = chunk_cfg.get("merge")
         if merge_strategy == "list" and isinstance(value, list):
             ordered = []
             key_map = {}
@@ -338,12 +339,20 @@ def parse_cv():
                         merged["Tools and Technologies"].append(tool_norm)
             extracted_data[section_name] = merged
 
-    output_path = OUTPUT_FILE.format(
-        file_to_process.replace(".txt", "").replace(".extracted_sections.json", "")
-    )
+    base_label = file_to_process.replace(".txt", "").replace(".extracted_sections.json", "")
+    source_slug = slugify(base_label, "cv")
+    candidate_name = candidate_name_from_sections(extracted_data, base_label)
+    candidate_slug_value = candidate_slug(candidate_name, source_slug)
+    output_filename = f"{candidate_slug_value}_{source_slug}.extracted_sections.json"
+    output_path = os.path.join("cv-workspace", output_filename)
 
     with open(output_path, "w", encoding="utf-8") as f:
         json.dump(extracted_data, f, indent=4, ensure_ascii=False)
+
+    parsed_map = workspace_config.setdefault("parsed_sections", {})
+    parsed_map[file_to_process] = output_filename
+    with open(CONFIG_FILE, "w", encoding="utf-8") as f:
+        json.dump(workspace_config, f, indent=2, ensure_ascii=False)
 
     console.print(
         f"[bold green]Parsed CV sections saved to: {output_path}[/bold green]"

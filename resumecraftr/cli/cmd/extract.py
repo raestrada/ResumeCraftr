@@ -6,6 +6,8 @@ from rich.prompt import Prompt
 from resumecraftr.cli.agent import execute_prompt, create_or_get_agent
 from resumecraftr.cli.prompts.resume import RAW_PROMPTS
 from resumecraftr.cli.utils.json import clean_json_response
+from resumecraftr.cli.utils.naming import slugify, candidate_name_from_sections, candidate_slug
+from resumecraftr.cli.utils.naming import slugify, candidate_name_from_sections, candidate_slug
 
 console = Console()
 CONFIG_FILE = os.path.join("cv-workspace", "resumecraftr.json")
@@ -57,13 +59,15 @@ def extract_sections(dummy):
             "interests": []
         }
         
-        # Generate a unique filename
-        base_name = "dummy"
         counter = 1
-        while os.path.exists(os.path.join("cv-workspace", f"{base_name}{counter}.extracted_sections.json")):
+        while True:
+            source_slug = slugify(f"dummy-{counter}", "dummy")
+            candidate_slug_value = candidate_slug("Dummy Candidate", source_slug)
+            output_filename = f"{candidate_slug_value}_{source_slug}.extracted_sections.json"
+            output_file = os.path.join("cv-workspace", output_filename)
+            if not os.path.exists(output_file):
+                break
             counter += 1
-        
-        output_file = os.path.join("cv-workspace", f"{base_name}{counter}.extracted_sections.json")
         
         with open(output_file, "w", encoding="utf-8") as f:
             json.dump(dummy_sections, f, indent=4, ensure_ascii=False)
@@ -71,7 +75,10 @@ def extract_sections(dummy):
         # Update config
         if "extracted_files" not in config:
             config["extracted_files"] = []
-        config["extracted_files"].append(f"{base_name}{counter}.txt")
+        text_entry = f"{source_slug}.txt"
+        config["extracted_files"].append(text_entry)
+        parsed_map = config.setdefault("parsed_sections", {})
+        parsed_map[text_entry] = output_filename
         
         with open(CONFIG_FILE, "w", encoding="utf-8") as f:
             json.dump(config, f, indent=4, ensure_ascii=False)
@@ -104,9 +111,12 @@ def extract_sections(dummy):
     if sections is None:
         return
 
-    output_file = os.path.join(
-        "cv-workspace", cv_file.replace(".txt", ".extracted_sections.json")
-    )
+    base_label = os.path.splitext(cv_file)[0]
+    source_slug = slugify(base_label, "cv")
+    candidate_name = candidate_name_from_sections(sections, base_label)
+    candidate_slug_value = candidate_slug(candidate_name, source_slug)
+    output_filename = f"{candidate_slug_value}_{source_slug}.extracted_sections.json"
+    output_file = os.path.join("cv-workspace", output_filename)
 
     with open(output_file, "w", encoding="utf-8") as f:
         json.dump(sections, f, indent=4, ensure_ascii=False)
@@ -114,6 +124,8 @@ def extract_sections(dummy):
     if "extracted_files" not in config:
         config["extracted_files"] = []
     config["extracted_files"].append(cv_file)
+    parsed_map = config.setdefault("parsed_sections", {})
+    parsed_map[cv_file] = output_filename
 
     with open(CONFIG_FILE, "w", encoding="utf-8") as f:
         json.dump(config, f, indent=4, ensure_ascii=False)

@@ -1,14 +1,21 @@
 import json
 from collections import Counter
 from pathlib import Path
-
 import click
 from rich.prompt import Prompt
 
 from resumecraftr.cli.agent import create_or_get_agent
 from resumecraftr.cli.ui import console, activity, create_progress
+from resumecraftr.cli.utils.naming import (
+    slugify,
+    candidate_name_from_sections,
+    candidate_slug as build_candidate_slug,
+)
 CONFIG_FILE = Path("cv-workspace/resumecraftr.json")
-OUTPUT_FILE = Path("cv-workspace/{0}.tailored_sections.json")
+
+
+def _extract_candidate_name(sections: dict, default: str) -> str:
+    return candidate_name_from_sections(sections, default)
 
 
 @click.command()
@@ -24,10 +31,13 @@ def tailor_cv() -> None:
     with CONFIG_FILE.open("r", encoding="utf-8") as fh:
         config = json.load(fh)
 
-    extracted_files = [
-        fname.replace(".txt", ".extracted_sections.json")
-        for fname in config.get("extracted_files", [])
-    ]
+    parsed_map = config.get("parsed_sections", {})
+    extracted_files = []
+    for fname in config.get("extracted_files", []):
+        resolved = parsed_map.get(fname)
+        if not resolved:
+            resolved = fname.replace(".txt", ".extracted_sections.json")
+        extracted_files.append(resolved)
     job_descriptions = config.get("job_descriptions", [])
 
     if not extracted_files or not job_descriptions:
@@ -182,11 +192,12 @@ def tailor_cv() -> None:
             progress_callback=handle_progress,
         )
 
-    output_path = OUTPUT_FILE.with_name(
-        OUTPUT_FILE.name.format(
-            sections_file.replace(".txt", "").replace(".extracted_sections.json", "")
-        )
-    )
+    base_label = sections_file.replace(".txt", "").replace(".extracted_sections.json", "")
+    candidate_name = _extract_candidate_name(sections_content, base_label)
+    candidate_slug_value = build_candidate_slug(candidate_name, base_label)
+    job_slug = slugify(Path(job_desc_file).stem, "job")
+    output_filename = f"{candidate_slug_value}_{job_slug}.tailored_sections.json"
+    output_path = Path("cv-workspace") / output_filename
 
     assembled = {}
     list_buffers = {}
@@ -213,5 +224,10 @@ def tailor_cv() -> None:
 
     with output_path.open("w", encoding="utf-8") as fh:
         json.dump(assembled, fh, indent=4, ensure_ascii=False)
+
+    tailormap = config.setdefault("tailored_files", {})
+    tailormap[output_filename] = sections_file
+    with CONFIG_FILE.open("w", encoding="utf-8") as cfg:
+        json.dump(config, cfg, indent=2, ensure_ascii=False)
 
     console.print(f"[bold green]Tailored CV saved to: {output_path}[/bold green]")

@@ -9,9 +9,22 @@ NC='\033[0m' # No Color
 
 # Parámetros del ejemplo
 RESUME_NAME="John Doe Principal Engineer Resume"
-RESUME_FILE="dummy_${RESUME_NAME}"
+RESUME_FILE=$(RESUME_NAME="$RESUME_NAME" poetry run python - <<'PY'
+import os
+from resumecraftr.cli.utils.naming import slugify, candidate_slug
+name = os.environ["RESUME_NAME"]
+base = slugify(name, "cv")
+print(f"{candidate_slug(name, base)}_{base}")
+PY
+)
 JOB_ROLE="Principal Engineer, Applied AI Experiences"
 JOB_DESCRIPTION="Northstar Studio is hiring a Principal Engineer to guide our applied AI experience teams. You will architect marketing analytics copilots, coach ten senior engineers, and own the reliability of multi-region LangChain/LangGraph services. Bring 15+ years across platform engineering, growth experimentation, and data storytelling."
+JOB_SLUG=$(JOB_ROLE="$JOB_ROLE" poetry run python - <<'PY'
+import os
+from resumecraftr.cli.utils.naming import slugify
+print(slugify(os.environ["JOB_ROLE"], "job"))
+PY
+)
 
 # Verificar si se pasó --use-poetry como argumento
 if [[ "$*" == *"--use-poetry"* ]]; then
@@ -115,7 +128,7 @@ cleanup_seed_files() {
     rm -f "cv-workspace/${RESUME_FILE}.extracted_sections.json"
     rm -f "cv-workspace/${RESUME_FILE}.txt"
     rm -f "cv-workspace/${RESUME_FILE}.optimized_sections.json"
-    rm -f "cv-workspace/${RESUME_FILE}.tailored_sections.json"
+    rm -f "cv-workspace/${RESUME_FILE}_${JOB_SLUG}.tailored_sections.json"
 }
 
 populate_cv_sections() {

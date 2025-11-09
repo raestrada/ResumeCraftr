@@ -9,6 +9,7 @@ from rich.prompt import Prompt
 from resumecraftr.cli.agent import execute_prompt, create_or_get_agent
 from resumecraftr.cli.prompts.sections import RAW_PROMPTS
 from resumecraftr.cli.utils.json import clean_json_response
+from resumecraftr.cli.utils.naming import slugify, candidate_name_from_sections, candidate_slug
 
 
 console = Console()
@@ -122,12 +123,20 @@ def extract_sections():
             if result is not None:  # Solo guardar si es JSON válido
                 extracted_data[section_name] = result
 
-    output_path = OUTPUT_FILE.format(
-        file_to_process.replace(".txt", "").replace(".extracted_sections.json", "")
-    )
+    base_label = file_to_process.replace(".txt", "").replace(".extracted_sections.json", "")
+    source_slug = slugify(base_label, "cv")
+    candidate_name = candidate_name_from_sections(extracted_data, base_label)
+    candidate_slug_value = candidate_slug(candidate_name, source_slug)
+    output_filename = f"{candidate_slug_value}_{source_slug}.extracted_sections.json"
+    output_path = os.path.join("cv-workspace", output_filename)
 
     with open(output_path, "w", encoding="utf-8") as f:
         json.dump(extracted_data, f, indent=4, ensure_ascii=False)
+
+    parsed_map = config.setdefault("parsed_sections", {})
+    parsed_map[file_to_process] = output_filename
+    with open(CONFIG_FILE, "w", encoding="utf-8") as f:
+        json.dump(config, f, indent=2, ensure_ascii=False)
 
     console.print(
         f"[bold green]Extracted sections saved to: {output_path}[/bold green]"

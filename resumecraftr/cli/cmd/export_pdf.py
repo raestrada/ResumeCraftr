@@ -105,6 +105,7 @@ def export_pdf(
 
     with CONFIG_FILE.open("r", encoding="utf-8") as fh:
         config = json.load(fh)
+    tailored_map = config.get("tailored_files", {})
 
     available = _detect_sections()
     if not available:
@@ -128,7 +129,11 @@ def export_pdf(
         tailored_sections = json.load(fh)
 
     base_name = sections_path.stem.replace(".tailored_sections", "")
-    extracted_path = sections_path.with_name(f"{base_name}.extracted_sections.json")
+    linked = tailored_map.get(sections_path.name)
+    if linked:
+        extracted_path = Path("cv-workspace") / linked
+    else:
+        extracted_path = sections_path.with_name(f"{base_name}.extracted_sections.json")
     if not extracted_path.exists():
         console.print(
             f"[bold red]Original sections file '{extracted_path.name}' not found. Re-run parsing first.[/bold red]"
