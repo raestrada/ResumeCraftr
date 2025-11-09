@@ -7,7 +7,7 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
-export RESUMECRAFTR_ASSUME_YES=1
+export RESUMECRAFTR_ASSUME_YES=0
 
 # Parámetros del ejemplo
 RESUME_NAME="John Doe Principal Engineer Resume"
