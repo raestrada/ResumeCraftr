@@ -1,11 +1,21 @@
 import re
+import unicodedata
 from typing import Any, Dict
+
+
+def _ascii(text: str) -> str:
+    return (
+        unicodedata.normalize("NFKD", text)
+        .encode("ascii", "ignore")
+        .decode("ascii")
+    )
 
 
 def slugify(value: str, fallback: str = "cv") -> str:
     if not value:
         return fallback
-    cleaned = re.sub(r"[^A-Za-z0-9]+", "-", value.strip().lower()).strip("-")
+    normalized = _ascii(value)
+    cleaned = re.sub(r"[^A-Za-z0-9]+", "-", normalized.strip().lower()).strip("-")
     return cleaned or fallback
 
 
@@ -26,7 +36,8 @@ def candidate_name_from_sections(sections: Dict[str, Any], fallback: str) -> str
 
 
 def candidate_slug(name: str, fallback: str) -> str:
-    parts = [p for p in re.split(r"\s+", (name or "").strip()) if p]
+    safe_name = _ascii(name or "")
+    parts = [p for p in re.split(r"\s+", safe_name.strip()) if p]
     if not parts:
         return slugify(fallback)
     if len(parts) == 1:
