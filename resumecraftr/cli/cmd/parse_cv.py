@@ -215,7 +215,7 @@ def parse_cv():
                 )
                 future = executor.submit(
                     process_section,
-                    config,
+                    workspace_config,
                     name,
                     chunk_text,
                     language,
