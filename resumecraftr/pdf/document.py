@@ -108,7 +108,7 @@ def build_resume_document(extracted: Dict, tailored: Dict) -> ResumeDocument:
 
         dates = exp.dates
         if not dates:
-            return (0, 0)
+            return (0, 0, "")
         parts = re.split(r"\s*-\s*", dates)
         end = parts[-1]
         year = None
@@ -117,7 +117,7 @@ def build_resume_document(extracted: Dict, tailored: Dict) -> ResumeDocument:
         else:
             match = re.search(r"(20\d{2}|19\d{2})", end)
             year = int(match.group(1)) if match else 0
-        return (year, exp.company)
+        return (year, exp.company or "", exp.role or "")
 
     experience_entries.sort(key=sort_key, reverse=True)
 
