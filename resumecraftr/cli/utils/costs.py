@@ -57,10 +57,10 @@ def _openrouter_models_from_api() -> dict:
     return models
 
 
-def _get_openrouter_pricing(model: str) -> Optional[PricingInfo]:
+def _get_openrouter_models() -> dict:
     cache = _load_pricing_cache()
     provider_cache = cache.get("openrouter", {})
-    models = provider_cache.get("models")
+    models = provider_cache.get("models") or {}
     timestamp = provider_cache.get("timestamp", 0)
     now = time.time()
     if not models or now - timestamp > CACHE_TTL_SECONDS:
@@ -69,16 +69,24 @@ def _get_openrouter_pricing(model: str) -> Optional[PricingInfo]:
             cache["openrouter"] = {"models": models, "timestamp": now}
             _save_pricing_cache(cache)
         except Exception:
-            models = provider_cache.get("models", {})
+            pass
+    return models or provider_cache.get("models", {})
 
-    if not models:
+
+def _lookup_model(models: dict, model: str) -> Optional[PricingInfo]:
+    if not models or not model:
         return None
-
-    candidates = [model, model.lower()]
+    targets = {model, model.lower(), model.replace(":", "/"), model.replace(":", "-"), model.replace("/", "-")}
     for key, value in models.items():
-        if key == model or key.lower() == model.lower():
+        compare = {key, key.lower()}
+        if targets & compare:
             return PricingInfo(prompt=float(value.get("prompt", 0)), completion=float(value.get("completion", 0)))
     return None
+
+
+def _get_openrouter_pricing(model: str) -> Optional[PricingInfo]:
+    models = _get_openrouter_models()
+    return _lookup_model(models, model)
 
 
 OPENAI_PRICING = {
@@ -92,6 +100,10 @@ OPENAI_PRICING = {
 
 
 def _get_openai_pricing(model: str) -> Optional[PricingInfo]:
+    models = _get_openrouter_models()
+    pricing = _lookup_model(models, model)
+    if pricing:
+        return pricing
     if model in OPENAI_PRICING:
         return OPENAI_PRICING[model]
     key = model.split(":", 1)[0]
