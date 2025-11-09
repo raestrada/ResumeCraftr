@@ -11,6 +11,7 @@ from resumecraftr.cli.utils.naming import (
     candidate_name_from_sections,
     candidate_slug as build_candidate_slug,
 )
+from resumecraftr.cli.utils.costs import confirm_llm_budget
 CONFIG_FILE = Path("cv-workspace/resumecraftr.json")
 
 
@@ -164,6 +165,16 @@ def tailor_cv() -> None:
         return
 
     total_sections = len(sections_payload)
+    estimated_chars = sum(len(item["content"]) for item in sections_payload) + len(job_description)
+    if not confirm_llm_budget(
+        "Tailor CV",
+        config,
+        estimated_chars,
+        completion_ratio=0.35,
+    ):
+        console.print("[yellow]Tailor operation cancelled.[/yellow]")
+        return
+
     console.print(
         f"[bold blue]Running LangGraph tailoring for {total_sections} sections...[/bold blue]"
     )

@@ -12,6 +12,7 @@ from rich.prompt import Prompt
 from resumecraftr.cli.agent import create_or_get_agent
 from resumecraftr.cli.ui import console, activity, create_progress
 from resumecraftr.cli.utils.json import clean_json_response
+from resumecraftr.cli.utils.costs import confirm_llm_budget
 from resumecraftr.pdf.document import (
     ExperienceEntry,
     EducationEntry,
@@ -152,7 +153,7 @@ def export_pdf(
             f"{sections_path.stem}.{translation_language.lower()}.translated.json"
         )
         resume_document = _translate_resume_document(
-            resume_document, translation_language, cache_path
+            resume_document, translation_language, cache_path, config
         )
     language_slug = (
         (translation_language or config.get("primary_language") or "en").lower()
@@ -193,7 +194,7 @@ def export_pdf(
 
 
 def _translate_resume_document(
-    resume: ResumeDocument, language: str, cache_path: Path
+    resume: ResumeDocument, language: str, cache_path: Path, workspace_config: dict
 ) -> ResumeDocument:
     if cache_path.exists():
         try:
@@ -205,6 +206,16 @@ def _translate_resume_document(
             return translated
         except Exception:
             pass
+
+    payload_chars = len(json.dumps(asdict(resume), ensure_ascii=False))
+    if not confirm_llm_budget(
+        f"Translate resume to {language.upper()}",
+        workspace_config,
+        payload_chars,
+        completion_ratio=1.0,
+    ):
+        console.print("[yellow]Translation cancelled.[/yellow]")
+        return resume
 
     runtime = create_or_get_agent()
     translator = ResumeTranslator(runtime, language)

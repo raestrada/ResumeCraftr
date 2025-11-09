@@ -8,6 +8,7 @@ from rich.prompt import Prompt
 from resumecraftr.cli.agent import execute_prompt, create_or_get_agent
 from resumecraftr.cli.prompts.sections import RAW_PROMPTS
 from resumecraftr.cli.utils.json import clean_json_response
+from resumecraftr.cli.utils.costs import confirm_llm_budget
 from resumecraftr.cli.utils.naming import slugify, candidate_name_from_sections, candidate_slug
 from resumecraftr.cli.ui import console, create_progress, activity
 CONFIG_FILE = os.path.join("cv-workspace", "resumecraftr.json")
@@ -195,16 +196,28 @@ def parse_cv():
 
     extracted_data = {}
 
+    pending_sections = []
+    estimated_chars = 0
+    for section_info in sections_config.get("sections", []):
+        name = section_info["name"]
+        use_full_text = name in SECTION_CHUNK_CONFIG
+        base_text = section_text_map.get(name, text_content)
+        if use_full_text or not base_text.strip():
+            base_text = text_content
+        chunks = chunk_text_for_section(name, base_text)
+        estimated_chars += sum(len(chunk) for chunk in chunks)
+        pending_sections.append((name, chunks))
+
+    from resumecraftr.cli.utils.costs import confirm_llm_budget
+
+    if not confirm_llm_budget("Parse CV", workspace_config, estimated_chars, completion_ratio=0.3):
+        console.print("[yellow]Parse cancelled.[/yellow]")
+        return
+
     with concurrent.futures.ThreadPoolExecutor() as executor, create_progress() as progress:
         future_to_section = {}
         section_tasks = {}
-        for section_info in sections_config.get("sections", []):
-            name = section_info["name"]
-            use_full_text = name in SECTION_CHUNK_CONFIG
-            base_text = section_text_map.get(name, text_content)
-            if use_full_text:
-                base_text = text_content
-            chunks = chunk_text_for_section(name, base_text)
+        for name, chunks in pending_sections:
             is_chunked = name in SECTION_CHUNK_CONFIG
             total = len(chunks)
             task_id = progress.add_task(f"[cyan]{name}", total=total)
