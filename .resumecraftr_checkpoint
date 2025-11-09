@@ -1,0 +1,5 @@
+generate_custom
+poetry run resumecraftr setup --language "EN" --provider "openrouter" --model "deepseek/deepseek-chat"
+poetry run resumecraftr new-cv "John Doe Principal Engineer Resume"
+populate_cv_sections
+poetry run resumecraftr add-job "Principal Engineer, Applied AI Experiences" --content "Northstar Studio needs a Principal Engineer to partner with Marketing and Revenue Operations leaders. Responsibilities include scaling LangChain/LangGraph copilots for analytics storytelling, coaching senior engineers, managing experimentation reliability, and translating signal quality into executive-ready narratives. Must demonstrate 15 years driving growth platforms, cloud infrastructure mastery, and persuasive data storytelling."

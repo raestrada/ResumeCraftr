@@ -108,7 +108,7 @@ def build_resume_document(extracted: Dict, tailored: Dict) -> ResumeDocument:
 
         dates = exp.dates
         if not dates:
-            return (0, 0, "")
+            return (0, "", exp.role or "")
         parts = re.split(r"\s*-\s*", dates)
         end = parts[-1]
         year = None
