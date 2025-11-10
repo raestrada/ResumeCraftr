@@ -26,9 +26,9 @@ LLM interactions now run through LangChain graph pipelines with retrieval backed
 
 ---
 
-## Release Notes v0.8.0-beta4
+## Release Notes v0.8.1-beta4
 
-You can find the release notes for version `v0.8.0-beta4` [here](https://github.com/raestrada/ResumeCraftr/releases/tag/v0.8.0-beta4).
+You can find the release notes for version `v0.8.1-beta4` [here](https://github.com/raestrada/ResumeCraftr/releases/tag/v0.8.1-beta4).
 
 ## Step 1: Install ResumeCraftr
 
@@ -37,7 +37,7 @@ First, install **ResumeCraftr** using [pipx](https://pypa.github.io/pipx/), a to
 To install **ResumeCraftr**, run:
 
 ```bash
-pipx install git+https://github.com/raestrada/ResumeCraftr.git@v0.8.0-beta4
+pipx install git+https://github.com/raestrada/ResumeCraftr.git@v0.8.1-beta4
 ```
 
 ## Quick Examples

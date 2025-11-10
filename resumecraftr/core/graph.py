@@ -5,11 +5,14 @@ from dataclasses import dataclass
 from typing import Callable, Dict, List, Optional, TypedDict
 
 from langchain_core.output_parsers import JsonOutputParser
+from langchain_core.outputs import Generation
+from langchain_core.exceptions import OutputParserException
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.retrievers import BaseRetriever
 from langgraph.graph import END, StateGraph
 
 from resumecraftr.core.llm import LLMConfig, create_chat_model
+from resumecraftr.cli.utils.json import clean_json_response
 
 
 class SectionPayload(TypedDict):
@@ -60,7 +63,27 @@ class ResumeTailorGraph:
 
     def __post_init__(self) -> None:
         self.llm = create_chat_model(self.config)
-        self.parser = JsonOutputParser()
+
+        class ResilientJsonParser(JsonOutputParser):
+            def parse_result(self, result: List[Generation], *, partial: bool = False):
+                try:
+                    return super().parse_result(result, partial=partial)
+                except Exception:
+                    text = ""
+                    if result:
+                        gen = result[0]
+                        if hasattr(gen, "text"):
+                            text = gen.text
+                        elif hasattr(gen, "message"):
+                            text = getattr(gen.message, "content", "")
+                    cleaned = clean_json_response(text)
+                    if cleaned is None:
+                        raise OutputParserException(
+                            "Invalid JSON output", llm_output=text
+                        )
+                    return cleaned
+
+        self.parser = ResilientJsonParser()
         self.prompt = ChatPromptTemplate.from_messages(
             [
                 (
@@ -149,16 +172,32 @@ class ResumeTailorGraph:
         section = state["sections"][state["index"]]
         context = "\n---\n".join(state.get("context_chunks", [])) or "No extra context found"
         schema_hint = SCHEMA_INSTRUCTIONS.get(section.get("schema"), DEFAULT_SCHEMA_HINT)
-        payload = self.chain.invoke(
-            {
-                "language": state["language"],
-                "section_name": section["name"],
-                "section_content": section["content"],
-                "context": context,
-                "job_description": state["job_description"],
-                "structure_hint": schema_hint,
-            }
-        )
+        request = {
+            "language": state["language"],
+            "section_name": section["name"],
+            "section_content": section["content"],
+            "context": context,
+            "job_description": state["job_description"],
+            "structure_hint": schema_hint,
+        }
+        try:
+            payload = self.chain.invoke(request)
+        except OutputParserException as exc:
+            fallback = clean_json_response(getattr(exc, "llm_output", "") or "")
+            if fallback is not None:
+                payload = fallback
+            else:
+                fixer_prompt = (
+                    "You must output ONLY valid JSON for the following schema. "
+                    "Fix the invalid response below.\n"
+                    f"Schema instructions: {schema_hint}\n"
+                    "Invalid response:\n"
+                    f"{getattr(exc, 'llm_output', '')}\n"
+                )
+                fixed = self.llm.invoke(fixer_prompt)
+                payload = clean_json_response(getattr(fixed, "content", "") or "")
+                if payload is None:
+                    raise
         optimized = dict(state["optimized"])
         optimized[section["id"]] = payload
         return {
