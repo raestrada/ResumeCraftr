@@ -16,7 +16,7 @@ CUSTOM_FILE = WORKSPACE / "custom.md"
 @click.option(
     "--provider",
     default="openrouter",
-    type=click.Choice(["openai", "openrouter", "ollama"], case_sensitive=False),
+    type=click.Choice(["openai", "openrouter", "ollama", "anthropic"], case_sensitive=False),
     show_default=True,
     help="LLM provider to use through LangChain",
 )
