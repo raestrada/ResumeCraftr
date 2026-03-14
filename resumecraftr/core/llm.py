@@ -12,10 +12,11 @@ from langchain_core.embeddings import Embeddings
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_community.chat_models.ollama import ChatOllama
 from langchain_community.embeddings import OllamaEmbeddings
+from langchain_anthropic import ChatAnthropic
 from sentence_transformers import SentenceTransformer
 
 
-Provider = Literal["openai", "openrouter", "ollama"]
+Provider = Literal["openai", "openrouter", "ollama", "anthropic"]
 
 
 @dataclass(frozen=True)
@@ -43,6 +44,15 @@ def _read_openrouter_api_key() -> Optional[str]:
         if value:
             return value
     return os.environ.get("OPENROUTER_API_KEY") or os.environ.get("OPENAI_API_KEY")
+
+
+def _read_anthropic_api_key() -> Optional[str]:
+    key_file = Path.home() / ".resumecraftr" / "anthropic_api_key.txt"
+    if key_file.exists():
+        value = key_file.read_text(encoding="utf-8").strip()
+        if value:
+            return value
+    return os.environ.get("ANTHROPIC_API_KEY")
 
 
 class SentenceTransformerEmbeddings(Embeddings):
@@ -82,6 +92,19 @@ def create_chat_model(config: LLMConfig) -> BaseChatModel:
             temperature=config.temperature,
             max_tokens=config.max_tokens,
             base_url="https://openrouter.ai/api/v1",
+            api_key=api_key,
+        )
+
+    if config.provider == "anthropic":
+        api_key = _read_anthropic_api_key()
+        if not api_key:
+            raise ValueError(
+                "ANTHROPIC_API_KEY not configured. Set the env var or create ~/.resumecraftr/anthropic_api_key.txt"
+            )
+        return ChatAnthropic(
+            model=config.model,
+            temperature=config.temperature,
+            max_tokens=config.max_tokens,
             api_key=api_key,
         )
 

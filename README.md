@@ -37,7 +37,7 @@ First, install **ResumeCraftr** using [pipx](https://pypa.github.io/pipx/), a to
 To install **ResumeCraftr**, run:
 
 ```bash
-pipx install git+https://github.com/raestrada/ResumeCraftr.git@v0.8.1-beta4
+pipx install git+https://github.com/raestrada/ResumeCraftr.git@v0.9.1-beta1
 ```
 
 ## Quick Examples

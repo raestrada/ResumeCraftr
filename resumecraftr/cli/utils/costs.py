@@ -98,6 +98,17 @@ OPENAI_PRICING = {
     "o1-preview": PricingInfo(prompt=0.000015, completion=0.00006),
 }
 
+# Approximate Anthropic Claude pricing (USD per token).
+# Values are based on public pricing per 1M tokens; they are only used for
+# rough budget estimation inside the CLI, not for billing.
+ANTHROPIC_PRICING = {
+    # Claude 4.6 Sonnet
+    "claude-sonnet-4-6": PricingInfo(prompt=0.000003, completion=0.000015),  # $3 / $15 per MTok
+    # Claude 3.5 Sonnet (fallback to same tier as Sonnet line)
+    "claude-3-5-sonnet-20241022": PricingInfo(prompt=0.000003, completion=0.000015),
+    "claude-3-5-sonnet": PricingInfo(prompt=0.000003, completion=0.000015),
+}
+
 
 def _get_openai_pricing(model: str) -> Optional[PricingInfo]:
     models = _get_openrouter_models()
@@ -110,6 +121,21 @@ def _get_openai_pricing(model: str) -> Optional[PricingInfo]:
     return OPENAI_PRICING.get(key)
 
 
+def _get_anthropic_pricing(model: str) -> Optional[PricingInfo]:
+    if not model:
+        return None
+    # Direct match first
+    if model in ANTHROPIC_PRICING:
+        return ANTHROPIC_PRICING[model]
+    # Strip any provider prefix like "anthropic/" or "openrouter/anthropic/"
+    core = model.split("/")[-1]
+    if core in ANTHROPIC_PRICING:
+        return ANTHROPIC_PRICING[core]
+    # Fallback: drop any version suffix after the first dash sequence
+    base = model.split(":", 1)[0]
+    return ANTHROPIC_PRICING.get(base)
+
+
 def get_model_pricing(llm_config: dict) -> Optional[PricingInfo]:
     provider = (llm_config or {}).get("provider", "").lower()
     model = llm_config.get("model")
@@ -119,6 +145,8 @@ def get_model_pricing(llm_config: dict) -> Optional[PricingInfo]:
         return _get_openrouter_pricing(model)
     if provider == "openai":
         return _get_openai_pricing(model)
+    if provider == "anthropic":
+        return _get_anthropic_pricing(model)
     return None
 
 
